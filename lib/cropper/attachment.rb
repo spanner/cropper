@@ -28,7 +28,7 @@ module Cropper
       #
       def has_upload(attachment_name=:image, options={})
         unless column_names.include?("#{attachment_name}_upload_id")
-          raise RuntimeError "has_upload(#{attachment_name}) called on class #{self.to_s} but we have no #{attachment_name}_upload_id column"
+          raise RuntimeError, "has_upload(#{attachment_name}) called on class #{self.to_s} but we have no #{attachment_name}_upload_id column"
         end
         
         options.reverse_merge!(:geometry => "640x960#", :cropped => true)

@@ -13,7 +13,7 @@ class Upload < ActiveRecord::Base
   has_attached_file :file,
                     :path => ":rails_root/public/system/:class/:attachment/:id/:style/:filename",
                     :url => "/system/:class/:attachment/:id/:style/:filename",
-                    :styles => { :thumb => "100x100#", :precrop => "1600x2400>" }
+                    :styles => { :thumb => "100x100#", :precrop => "1200x1600>" }
   
   ## Image dimensions
   #
@@ -28,8 +28,8 @@ class Upload < ActiveRecord::Base
     @original_geometry ||= Paperclip::Geometry.new(original_width, original_height)
   end
 
-  # *geometry*, given a style name, calculates the dimensions of the file if that style were applied. For 
-  # speed, we calculate this rather than reading the file, which might be in S3 or some other distant place. 
+  # *geometry*, given a style name, returns the dimensions of the file if that style were applied. For 
+  # speed we calculate this rather than reading the file, which might be in S3 or some other distant place. 
   # 
   # The logic is in [lib/paperclip/geometry_tranformation.rb](/lib/paperclip/geometry_tranformation.html), 
   # which is a ruby library that mimics the action of imagemagick's convert command.
@@ -48,7 +48,6 @@ class Upload < ActiveRecord::Base
       end
     rescue Paperclip::TransformationError => e
       # In case of explosion, we always return the original dimensions so that action can continue.
-      Rails.logger.warn "geometry transformation error: #{e}"
       original_geometry
     end
   end

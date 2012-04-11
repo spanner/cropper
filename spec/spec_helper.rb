@@ -6,6 +6,8 @@ require 'cropper/railtie'
 require 'shoulda/matchers'
 
 include ActiveSupport
+include ActionDispatch::TestProcess
+
 ["app/**/", "lib/**/"].each do |glob|
   Dir.glob(glob).each do |dir| 
     Dependencies.autoload_paths << File.join(File.dirname(__FILE__), dir)
@@ -28,3 +30,10 @@ RSpec.configure do |config|
   config.include ActsAsFu
 end
 
+module Rack::Test
+  class UploadedFile
+    def tempfile
+      @tempfile
+    end
+  end
+end

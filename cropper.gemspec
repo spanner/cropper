@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.authors     = ["William Ross"]
   s.email       = ["will@spanner.org"]
   s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.summary     = %q{A simple but specific way to attach croppable uploads to any model}
+  s.description = %q{Provides a mechanism for uploading, cropping and reusing images in any of your models. Right now it may be overly specific but it is gradually becoming more general}
 
   s.rubyforge_project = "cropper"
 
@@ -22,6 +22,5 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec-rails"
-  s.add_development_dependency "shoulda-matchers"
   s.add_development_dependency "acts_as_fu"
 end

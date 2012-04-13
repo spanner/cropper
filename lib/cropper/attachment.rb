@@ -32,7 +32,9 @@ module Cropper
         end
         
         options.reverse_merge!(:geometry => "640x960#", :cropped => true)
-        options[:geometry].sub!(/\D*$/, '#') if options[:cropped]
+        options[:geometry].sub!(/\D*$/, '') if options[:cropped]
+        # raise here if geometry is not useable
+        
         class_variable_set(:"@@#{attachment_name}_cropped", options[:cropped])
         
         # The essential step is present in this style definition. It specifies the OffsetThumbnail processor, 
@@ -46,15 +48,17 @@ module Cropper
 
           # The processor will first scale the image to the width that is specified by the scale_width property of the instance
           :scale => lambda { |att| 
-            width = send :"#{attachment_name}_scale_width"
+            STDERR.puts "scale #{att.inspect}"
+            width = att.instance.send :"#{attachment_name}_scale_width"
             "#{width}x"
           },
 
           # ...then perform the crop described by the width, height, offset_top and offset_left properties of the instance.
           :crop_and_offset => lambda { |att| 
-            width, height = size.split('x')
-            left = send :"#{attachment_name}_offset_left"
-            top = send :"#{attachment_name}_offset_top"
+            STDERR.puts "crop_and_offset #{att.inspect}"
+            width, height = options[:geometry].split('x')
+            left = att.instance.send :"#{attachment_name}_offset_left"
+            top = att.instance.send :"#{attachment_name}_offset_top"
             "%dx%d%+d%+d" % [width, height, -left, -top]
           }
         }
@@ -64,7 +68,7 @@ module Cropper
         # [uploads](/app/models/upload.html) are the raw image files uploaded by this person. 
         # They are held separately as the basis for repeatable (and shareable) image assignment.
         #
-        belongs_to :"#{attachment_name}_upload"
+        belongs_to :"#{attachment_name}_upload", :class_name => "Upload"
         before_save :"read_#{attachment_name}_upload"
 
         ### Attachment
@@ -93,6 +97,7 @@ module Cropper
         # and apply the current crop and scale values.
         #
         define_method :"read_#{attachment_name}_upload" do
+          STDERR.puts ">>  read_#{attachment_name}_upload"
           if self.send(:"reprocess_#{attachment_name}?") && upload = self.send(:"#{attachment_name}_upload")
             self.send :"#{attachment_name}=", upload.file  
           end
@@ -103,13 +108,27 @@ module Cropper
         cols = [:upload_id]
         cols += [:upload_id, :scale_width, :offset_top, :offset_left] if options[:cropped]
         define_method :"reprocess_#{attachment_name}?" do
+          STDERR.puts ">>  reprocess_#{attachment_name}?"
           cols.any? {|col| send(:"#{attachment_name}_#{col}_changed?") }
         end
         
         # * [name]_cropped? returns true if the named attachment is cropped on assignment. It can be useful in a form partial.
         #
         define_method :"#{attachment_name}_cropped?" do
+          STDERR.puts ">>  #{attachment_name}_cropped?"
           !!class_variable_get(:"@@#{attachment_name}_cropped")
+        end
+        
+
+
+
+        
+        define_method :"#{attachment_name}_for_cropping" do
+          if upload = send(:"#{attachment_name}_upload")
+            # here we introduce a convention that might not stand up
+            STDERR.puts ">>  #{attachment_name}_for_cropping"
+            upload.url(:"#{attachment_name}")
+          end
         end
 
       end

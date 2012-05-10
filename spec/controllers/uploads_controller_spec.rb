@@ -1,5 +1,5 @@
 require 'spec_helper'
 
-describe UploadsController do
+describe Cropper::UploadsController do
 
 end

@@ -33,7 +33,7 @@ module Cropper
     #     has_upload :icon, :size => '40x40#', :crop => false
     #
     def has_upload(attachment_name=:image, options={})
-      unless column_names.include?("#{attachment_name}_upload_id")
+      unless !table_exists? || column_names.include?("#{attachment_name}_upload_id")
         raise RuntimeError, "has_upload(#{attachment_name}) called on class #{self.to_s} but we have no #{attachment_name}_upload_id column"
       end
 

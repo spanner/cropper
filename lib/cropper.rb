@@ -1,10 +1,6 @@
-require "cropper/version"
-require "paperclip"
-require "paperclip/geometry_transformation"
-require "paperclip_processors/offset_thumbnail"
-require "cropper/attachment"
-require "cropper/railtie"
+require "cropper/engine"
 
 module Cropper
-  # Your code goes here...
+  mattr_accessor :attachment_path
+  mattr_accessor :attachment_url
 end

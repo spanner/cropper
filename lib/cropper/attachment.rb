@@ -119,10 +119,6 @@ module Cropper
           !!class_variable_get(:"@@#{attachment_name}_cropped")
         end
         
-
-
-
-        
         define_method :"#{attachment_name}_for_cropping" do
           if upload = send(:"#{attachment_name}_upload")
             # here we introduce a convention that might not stand up

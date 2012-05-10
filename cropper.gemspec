@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec-rails"
+  s.add_development_dependency "capybara"
   s.add_development_dependency "acts_as_fu"
   s.add_development_dependency "sqlite3"
   

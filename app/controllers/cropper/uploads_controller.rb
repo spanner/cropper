@@ -1,5 +1,5 @@
 module Cropper
-  class UploadsController < ApplicationController
+  class UploadsController < ::ApplicationController
     respond_to :js
 
     def show

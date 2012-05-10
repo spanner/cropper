@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Cropper" do
+describe Cropper::Attachment do
   
   describe "A model class" do
     before :each do

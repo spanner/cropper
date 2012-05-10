@@ -10,13 +10,11 @@
 # style for each one.
 #
 class Upload < ActiveRecord::Base
-  belongs_to :person
-
   has_attached_file :file,
                     :path => ":rails_root/public/system/:class/:attachment/:id/:style/:filename",
                     :url => "/system/:class/:attachment/:id/:style/:filename",
-                    :processors => lambda { |att| att.instance.precrop_processors },
-                    :styles => lambda { |att| att.instance.precrop_styles }
+                    :processors => lambda { |instance| instance.precrop_processors },
+                    :styles => lambda { |attachment| attachment.instance.precrop_styles }
 
   # To change precrop dimensions or other thumbnail properties, just monkeypatch this method.
   #
@@ -30,6 +28,8 @@ class Upload < ActiveRecord::Base
   def precrop_processors
     [:thumbnail]
   end
+  
+  validates :file, :attachment_presence => true
 
   ## Image dimensions
   #

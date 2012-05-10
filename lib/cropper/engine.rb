@@ -6,6 +6,8 @@ require "cropper/attachment"
 module Cropper
 
   class Engine < Rails::Engine
+    
+    engine_name "cropper"
 
     initialize "cropper.load_app_instance_data" do |app|
       Cropper.setup do |config|

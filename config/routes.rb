@@ -1,3 +1,3 @@
-Cropper::Engine.routes.draw do
+Rails.application.routes.draw do
   resources :uploads
 end

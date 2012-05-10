@@ -39,8 +39,8 @@ module Cropper
         
         # The essential step is present in this style definition. It specifies the OffsetThumbnail processor, 
         # which is similar to the usual thumbnailer but has a more flexible scaling and cropping procedure,
-        # and passes through a couple of callback procs that will provide the scaling and cropping arguments
-        # that the processor requires.
+        # and passes through a couple of callback procs that will return the scaling and cropping arguments
+        # it requires.
         #
         crop_style = options[:cropped] == false ? geometry : {
           :geometry => "#{options[:geometry]}#",
@@ -62,6 +62,9 @@ module Cropper
             "%dx%d%+d%+d" % [width, height, -left, -top]
           }
         }
+        
+        options[:styles] ||= { :icon => "48x48#" }
+        thumbnail_styles = options[:styles].merge({:cropped => crop_style})
 
         ### Upload association
         #
@@ -83,12 +86,9 @@ module Cropper
         has_attached_file attachment_name, 
                           :path => ":rails_root/public/system/:class/:attachment/:id/:style/:filename",
                           :url => "/system/:class/:attachment/:id/:style/:filename",
-                          :default_url => '/assets/nopicture_:style.png',
+                          :default_url => "/assets/#{attachment_name}_missing_:style.png",
                           :whiny => true,
-                          :styles => {
-                            :icon => "48x48#", 
-                            :cropped => crop_style
-                          }
+                          :styles => thumbnail_styles
 
         ## Maintenance
         #

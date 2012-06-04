@@ -1,7 +1,6 @@
 # This is a standard upload class that should be useable for most purposes. 
 # We assume that even when the final destination is an S3 bucket, the initial upload
-# will be held locally. You get a quicker response that way.
-# 
+# will be held locally.
 #
 class Upload < ActiveRecord::Base
   has_attached_file :file,
@@ -15,7 +14,8 @@ class Upload < ActiveRecord::Base
   def precrop_styles
     {
       :icon => { :geometry => "40x40#" },
-      :precrop => { :geometry => "1600x1600>" },
+      :thumb => { :geometry => "100x100#" },
+      :precrop => { :geometry => "1600x3000>" }
     }
   end
 

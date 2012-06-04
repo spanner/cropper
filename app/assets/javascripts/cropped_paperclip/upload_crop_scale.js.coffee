@@ -216,6 +216,7 @@ jQuery ($) ->
       @scaler.remove()
       @overflow.remove()
       @preview.unbind "mousedown", @drag
+      @preview.css "cursor", 'auto'
       @preview.fadeTo "slow", 1
       @container.find(".range_marker").remove()
       @resetControls()

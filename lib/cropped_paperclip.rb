@@ -39,7 +39,7 @@ module CroppedPaperclip
         raise RuntimeError, "has_upload(#{attachment_name}) called on class #{self.to_s} but we have no #{attachment_name}_upload_id column"
       end
 
-      options.reverse_merge!(:geometry => "640x960#", :cropped => true)
+      options.reverse_merge!(:geometry => "640x960#", :cropped => true, :default_url => "/assets/#{attachment_name}_missing_:style.png", :whiny => true)
       options[:geometry].sub!(/\D*$/, '') if options[:cropped]
       # raise here if geometry is not useable
 
@@ -72,7 +72,7 @@ module CroppedPaperclip
       }
 
       options[:styles] ||= { :icon => "48x48#" }
-      thumbnail_styles = options[:styles].merge({:cropped => crop_style})
+      options[:styles].merge!({:cropped => crop_style})
 
       ### Upload association
       #
@@ -81,23 +81,6 @@ module CroppedPaperclip
       #
       belongs_to :"#{attachment_name}_upload", :class_name => "Upload"
       before_save :"read_#{attachment_name}_upload"
-      
-      ### Validation of upload
-      #
-      # Pass a :validation option containing a hash of the usual validates_attachment parameters.
-      # Here you can also specify :width and :height in the usual formats if you want to validate against the pixel dimensions
-      # of the uploaded image:
-      #
-      #    has_upload :image, :validation => {
-      #                         :width => {:greater_than => 1000},
-      #                         :height => {:greater_than => 600},
-      #                         :content_type =>"image/jpg",
-      #                         :presence => true
-      #                       }
-      
-      if options[:validation]
-        validates_attachment attachment_name, options[:validation]
-      end
 
       ### Attachment
       #
@@ -108,21 +91,18 @@ module CroppedPaperclip
       # The cropped image is created by a [custom processor](/lib/paperclip_processors/offset_thumbnail.html) very similar to 
       # Paperclip::Thumbnail, but which looks up the scale and crop parameters to calculate the imagemagick transformation.
       #
-      has_attached_file attachment_name, 
-                        :path => ":rails_root/public/system/:class/:attachment/:id/:style/:filename",
-                        :url => "/system/:class/:attachment/:id/:style/:filename",
-                        :default_url => "/assets/#{attachment_name}_missing_:style.png",
-                        :whiny => true,
-                        :styles => thumbnail_styles
+      
+      Rails.logger.warn ">>> has_upload creating file attachment #{attachment_name} on #{self} with options #{options.inspect}"
+      
+      has_attached_file attachment_name, options
 
       ## Maintenance
       #
       # *read_[name]_upload* is called before_save. If there is a new upload, or any of our scale and crop values are changed, it will assign 
-      # the uploaded file to the person image. Even if it's the same file as before, the effect is to trigger post-processing again
-      # and apply the current crop and scale values.
+      # the uploaded file. Even if it's the same file as before, the effect is to trigger post-processing again and apply the current crop and scale values.
       #
       define_method :"read_#{attachment_name}_upload" do
-        if self.send(:"reprocess_#{attachment_name}?") && upload = self.send(:"#{attachment_name}_upload")
+        if self.send(:"reprocess_#{attachment_name}?") && upload = self.send(:"#{attachment_name}_upload")  
           self.send :"#{attachment_name}=", upload.file  
         end
       end

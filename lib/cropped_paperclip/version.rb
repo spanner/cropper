@@ -1,3 +1,3 @@
-module Cropper
+module CroppedPaperclip
   VERSION = "0.0.1"
 end

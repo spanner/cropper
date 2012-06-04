@@ -1,13 +1,7 @@
-# This is a base class for your uploads. It defines all the essential methods and offers some hooks that
-# you can override to set local style definitions. All you need is something like this:
-#
-#   class Upload << Cropper::Upload
-#     def thumbnail_styles 
-#       {:precrop => "500x500>"}
-#     end
-#
-# If you have models with very different image-crop outcomes you may want to define a different precrop 
-# style for each one.
+# This is a standard upload class that should be useable for most purposes. 
+# We assume that even when the final destination is an S3 bucket, the initial upload
+# will be held locally. You get a quicker response that way.
+# 
 #
 class Upload < ActiveRecord::Base
   has_attached_file :file,

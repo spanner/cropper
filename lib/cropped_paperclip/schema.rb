@@ -1,4 +1,4 @@
-module Cropper
+module CroppedPaperclip
   # Provides helpers that can be used in migrations. 
   # Copied from, and often makes calls on, the equivalent file in Paperclip.
   #

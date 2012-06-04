@@ -1,16 +1,16 @@
 require "paperclip"
 require "paperclip/geometry_transformation"
 require "paperclip_processors/offset_thumbnail"
-require "cropper/engine"
-require 'cropper/glue'
+require "cropped_paperclip/engine"
+require 'cropped_paperclip/glue'
 
-module Cropper
+module CroppedPaperclip
   mattr_accessor :attachment_path
   mattr_accessor :attachment_url
   attachment_path = ":rails_root/public/system/:class/:attachment/:id/:style/:filename"
   attachment_url = "/system/:class/:attachment/:id/:style/:filename"
   
-  # Cropper::ClassMethods is included into ActiveRecord::Base in the same way as the Paperclip module. 
+  # CroppedPaperclip::ClassMethods is included into ActiveRecord::Base in the same way as the Paperclip module. 
   # It adds a `has_upload` class method that defines an attachment and adds several instance methods 
   # that will return the values that determine its cropping. Those values are usually but not  
   # necessarily given by the user.
@@ -79,6 +79,23 @@ module Cropper
       #
       belongs_to :"#{attachment_name}_upload", :class_name => "Upload"
       before_save :"read_#{attachment_name}_upload"
+      
+      ### Validation of upload
+      #
+      # Pass a :validation option containing a hash of the usual validates_attachment parameters.
+      # Here you can also specify :width and :height in the usual formats if you want to validate against the pixel dimensions
+      # of the uploaded image:
+      #
+      #    has_upload :image, :validation => {
+      #                         :width => {:greater_than => 1000},
+      #                         :height => {:greater_than => 600},
+      #                         :content_type =>"image/jpg",
+      #                         :presence => true
+      #                       }
+      
+      if options[:validation]
+        validates_attachment attachment_name, options[:validation]
+      end
 
       ### Attachment
       #
@@ -103,7 +120,6 @@ module Cropper
       # and apply the current crop and scale values.
       #
       define_method :"read_#{attachment_name}_upload" do
-        STDERR.puts ">>  read_#{attachment_name}_upload"
         if self.send(:"reprocess_#{attachment_name}?") && upload = self.send(:"#{attachment_name}_upload")
           self.send :"#{attachment_name}=", upload.file  
         end
@@ -114,7 +130,6 @@ module Cropper
       cols = [:upload_id]
       cols += [:upload_id, :scale_width, :offset_top, :offset_left] if options[:cropped]
       define_method :"reprocess_#{attachment_name}?" do
-        STDERR.puts ">>  reprocess_#{attachment_name}?"
         cols.any? {|col| send(:"#{attachment_name}_#{col}_changed?") }
       end
 

@@ -1,3 +1,3 @@
 Rails.application.routes.draw do
-  mount Cropper::Engine => "/cropper"
+  mount CroppedPaperclip::Engine => "/cropped_paperclip"
 end

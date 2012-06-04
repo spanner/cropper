@@ -1,4 +1,4 @@
-module Cropper
+module CroppedPaperclip
   class UploadsController < ::ApplicationController
     respond_to :js
 

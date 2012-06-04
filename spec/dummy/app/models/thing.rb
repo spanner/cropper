@@ -1,7 +1,7 @@
 # This is a base class for your uploads. It defines all the essential methods and offers some hooks that
 # you can override to set local style definitions. All you need is something like this:
 #
-#   class Upload << Cropper::Upload
+#   class Upload << CroppedPaperclip::Upload
 #     def thumbnail_styles 
 #       {:precrop => "500x500>"}
 #     end

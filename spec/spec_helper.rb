@@ -10,7 +10,7 @@ Rails.backtrace_cleaner.remove_silencers!
 # Load support files
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
-require 'cropper'
+require 'cropped_paperclip'
 
 RSpec.configure do |config|
   config.include Paperclip::Shoulda::Matchers

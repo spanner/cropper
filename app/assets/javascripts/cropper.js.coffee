@@ -1,3 +1,3 @@
-#= require cropper/filedrop
-#= require cropper/upload_crop_scale
+#= require cropped_paperclip/filedrop
+#= require cropped_paperclip/upload_crop_scale
 #= require_self

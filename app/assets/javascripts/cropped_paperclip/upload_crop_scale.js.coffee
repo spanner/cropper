@@ -1,11 +1,14 @@
 jQuery ($) ->
-
-  $.fn.uploader = ->
+  "use strict"
+  
+  $.fn.uploader = (opts) ->
+    options = $.extend {}, opts
     dropbox = $(this)
     csrf_token = dropbox.parents("form").find('input[name="authenticity_token"]').val()
-    filefield = dropbox.find("input.dropfile")
-    url = dropbox.attr("rel")
-    paramname = "upload[file]"
+    filefield_selector = options.filefield ? 'input[type="file"]'
+    filefield = dropbox.find(filefield_selector)
+    url = options.url ? dropbox.attr("rel")
+    paramname = options.paramname ? "upload[file]"
     
     finisher = (i, file, response, time) ->
       dropbox.find("div.progress_holder").remove()
@@ -14,7 +17,7 @@ jQuery ($) ->
 
     dropbox.filedrop
       maxfiles: 1
-      maxfilesize: 5
+      maxfilesize: 10
       url: url
       paramname: paramname
       data:
@@ -45,7 +48,7 @@ jQuery ($) ->
           when "TooManyFiles"
             alert "You can only upload 1 file."
           when "FileTooLarge"
-            alert file.name + " is too large! Files up to 5mb are allowed."
+            alert file.name + " is too large! Files up to 10MB are allowed."
           else
 
       dragOver: ->
@@ -77,7 +80,8 @@ jQuery ($) ->
     dropbox.find("a.picker").picker()
     filefield.change (e) ->
       dropbox.trigger "pick", filefield[0]
-
+    @
+    
   $.fn.recropper = ->
     dropbox = $("div.dropbox")
     @click (e) ->
@@ -92,7 +96,7 @@ jQuery ($) ->
     @click (e) ->
       e.preventDefault()
       e.stopPropagation()
-      $("#file_upload}").trigger('click')
+      $("#file_upload").trigger('click')
     @
 
   $.fn.click_proxy = (target_selector) ->
@@ -211,6 +215,7 @@ jQuery ($) ->
       e.preventDefault()
       @scaler.remove()
       @overflow.remove()
+      @preview.unbind "mousedown", @drag
       @preview.fadeTo "slow", 1
       @container.find(".range_marker").remove()
       @resetControls()
@@ -230,12 +235,12 @@ jQuery ($) ->
 
   class Scaler
     constructor: (range, callbacks) ->
-      callbacks = {}  unless callbacks?
+      @callbacks = $.extend {}, callbacks
       @input = $(range)
       @pos = 0
-      @value = input.val()
-      @max = parseInt(input.attr("max"), 10)
-      @min = parseInt(input.attr("min"), 10)
+      @value = @input.val()
+      @max = parseInt(@input.attr("max"), 10)
+      @min = parseInt(@input.attr("min"), 10)
       @slider = $("<span class=\"slider\"><span class=\"scale\"><span class=\"marker\"></span></span></span>")
       @scale = @slider.find(".scale")
       @marker = @slider.find(".marker")
@@ -246,11 +251,12 @@ jQuery ($) ->
       @input.before(@slider).hide()
 
     drag: (e) =>
+      console.log 'drag'
       e.preventDefault()
       @lastX = e.pageX
       $(window).bind "mousemove", @move
       $(window).bind "mouseup", @drop
-      callbacks.drag.call(@, @value) if callbacks.drag?
+      @callbacks.drag?.call @, @value
 
     move: (e) =>
       deltaX = e.pageX - @lastX
@@ -260,15 +266,16 @@ jQuery ($) ->
       @.placeMarker(@pos)
       @.recalculate()
       @.lastX = e.pageX
-      callbacks.move.call(@, @value) if callbacks.move?
+      @callbacks.move?.call @, @value
 
-    drop: (e) ->
+    drop: (e) =>
+      console.log 'drop'
       @move e
       $(window).unbind "mousemove", @move
       $(window).unbind "mouseup", @drop
-      callbacks.drop.call(@, @value) if callbacks.drop?
+      @callbacks.drop?.call @, @value
 
-    recalculate: ->
+    recalculate: =>
       origin = @min
       scale_width = 150
       pixel_proportion = (@pos / scale_width)
@@ -276,19 +283,16 @@ jQuery ($) ->
       @value = Math.round(origin + (value_width * pixel_proportion))
       @input.val(@value)
 
-    reposition: ->
+    reposition: =>
       origin = @min
       value_proportion = (@value - origin) / (@max - origin)
       scale_width = 150
       @pos = Math.round(scale_width * value_proportion)
       @placeMarker @pos
 
-    placeMarker: (x) ->
+    placeMarker: (x) =>
       @marker.css "left", x - 3
 
-    remove: ->
+    remove: =>
       @slider.remove()
-
-$ ->
-  $('.dropbox').uploader()	
-  $('a.recrop').recropper()	
+      

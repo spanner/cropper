@@ -1,4 +1,6 @@
 require "paperclip"
+require "paperclip/validators/attachment_height_validator"
+require "paperclip/validators/attachment_width_validator"
 require "paperclip/geometry_transformation"
 require "paperclip_processors/offset_thumbnail"
 require "cropped_paperclip/engine"

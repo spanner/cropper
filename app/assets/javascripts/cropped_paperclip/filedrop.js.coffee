@@ -21,7 +21,16 @@
 #  Usage:
 #      See README at project homepage
  
- jQuery ($) ->
+jQuery ($) ->
+  jQuery.event.props.push "dataTransfer"
+
+  opts = {}
+  errors = [ "BrowserNotSupported", "TooManyFiles", "FileTooLarge" ]
+  doc_leave_timer = undefined
+  stop_loop = false
+  files_count = 0
+  files = undefined
+  
   drop = (e) ->
     opts.drop e
     files = e.dataTransfer.files
@@ -29,6 +38,7 @@
       opts.error errors[0]
       return false
     files_count = files.length
+    console.log "drop", files, files_count
     upload()
     e.preventDefault()
     false
@@ -36,6 +46,7 @@
   pick = (e, filefield) ->
     files = filefield.files
     files_count = files.length
+    console.log "pick", files, files_count
     upload()
 
   getBuilder = (filename, filedata, boundary) ->
@@ -119,6 +130,9 @@
           filesDone++
           afterAll()  if filesDone is files_count - filesRejected
           stop_loop = true  if result is false
+
+    console.log "upload", files
+
     stop_loop = false
     unless files
       opts.error errors[0]
@@ -147,6 +161,7 @@
         else
           filesRejected++
       catch err
+        console.log "upload error:", err
         opts.error errors[0]
         return false
       i++
@@ -195,8 +210,7 @@
       opts.docLeave e
     , 200)
   empty = ->
-  jQuery.event.props.push "dataTransfer"
-  opts = {}
+
   default_opts =
     url: ""
     refresh: 1000
@@ -222,18 +236,13 @@
     progressUpdated: empty
     speedUpdated: empty
 
-  errors = [ "BrowserNotSupported", "TooManyFiles", "FileTooLarge" ]
-  doc_leave_timer = undefined
-  stop_loop = false
-  files_count = 0
-  files = undefined
   $.fn.filedrop = (options) ->
     opts = $.extend({}, default_opts, options)
     @bind("drop", drop).bind("pick", pick).bind("dragenter", dragEnter).bind("dragover", dragOver).bind "dragleave", dragLeave
     $(document).bind("drop", docDrop).bind("dragenter", docEnter).bind("dragover", docOver).bind "dragleave", docLeave
 
   try
-    return  if XMLHttpRequest::sendAsBinary
+    return if XMLHttpRequest::sendAsBinary
     XMLHttpRequest::sendAsBinary = (datastr) ->
       byteValue = (x) ->
         x.charCodeAt(0) & 0xff

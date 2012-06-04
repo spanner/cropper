@@ -58,16 +58,16 @@ module CroppedPaperclip
         :scale => lambda { |att| 
           STDERR.puts "scale #{att.inspect}"
           width = att.instance.send :"#{attachment_name}_scale_width"
-          "#{width}x"
+          "#{width || 0}x"
         },
 
         # ...then perform the crop described by the width, height, offset_top and offset_left properties of the instance.
         :crop_and_offset => lambda { |att| 
           STDERR.puts "crop_and_offset #{att.inspect}"
           width, height = options[:geometry].split('x')
-          left = att.instance.send :"#{attachment_name}_offset_left"
+          left = att.instance.send :"#{attachment_name}_offset_left" || 0
           top = att.instance.send :"#{attachment_name}_offset_top"
-          "%dx%d%+d%+d" % [width, height, -left, -top]
+          "%dx%d%+d%+d" % [width, height, -(left  || 0), -(top || 0)]
         }
       }
 
@@ -91,9 +91,6 @@ module CroppedPaperclip
       # The cropped image is created by a [custom processor](/lib/paperclip_processors/offset_thumbnail.html) very similar to 
       # Paperclip::Thumbnail, but which looks up the scale and crop parameters to calculate the imagemagick transformation.
       #
-      
-      Rails.logger.warn ">>> has_upload creating file attachment #{attachment_name} on #{self} with options #{options.inspect}"
-      
       has_attached_file attachment_name, options
 
       ## Maintenance

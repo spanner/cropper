@@ -1,6 +1,4 @@
 jQuery ($) ->
-  "use strict"
-  
   $.fn.uploader = (opts) ->
     options = $.extend {}, opts
     dropbox = $(this)

@@ -5,6 +5,9 @@ jQuery ($) ->
     csrf_token = dropbox.parents("form").find('input[name="authenticity_token"]').val()
     filefield_selector = options.filefield ? 'input[type="file"]'
     filefield = dropbox.find(filefield_selector)
+    
+    console.log "filefield is", filefield
+    
     url = options.url ? dropbox.attr("rel")
     paramname = options.paramname ? "upload[file]"
     

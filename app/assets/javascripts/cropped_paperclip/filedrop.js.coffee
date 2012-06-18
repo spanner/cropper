@@ -38,7 +38,6 @@ jQuery ($) ->
       opts.error errors[0]
       return false
     files_count = files.length
-    console.log "drop", files, files_count
     upload()
     e.preventDefault()
     false
@@ -46,7 +45,6 @@ jQuery ($) ->
   pick = (e, filefield) ->
     files = filefield.files
     files_count = files.length
-    console.log "pick", files, files_count
     upload()
 
   getBuilder = (filename, filedata, boundary) ->
@@ -131,8 +129,6 @@ jQuery ($) ->
           afterAll()  if filesDone is files_count - filesRejected
           stop_loop = true  if result is false
 
-    console.log "upload", files
-
     stop_loop = false
     unless files
       opts.error errors[0]
@@ -161,7 +157,6 @@ jQuery ($) ->
         else
           filesRejected++
       catch err
-        console.log "upload error:", err
         opts.error errors[0]
         return false
       i++

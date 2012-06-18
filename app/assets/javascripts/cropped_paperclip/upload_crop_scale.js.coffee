@@ -250,7 +250,6 @@ jQuery ($) ->
       @input.before(@slider).hide()
 
     drag: (e) =>
-      console.log 'drag'
       e.preventDefault()
       @lastX = e.pageX
       $(window).bind "mousemove", @move
@@ -268,7 +267,6 @@ jQuery ($) ->
       @callbacks.move?.call @, @value
 
     drop: (e) =>
-      console.log 'drop'
       @move e
       $(window).unbind "mousemove", @move
       $(window).unbind "mouseup", @drop

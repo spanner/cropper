@@ -11,6 +11,10 @@ module CroppedPaperclip
       @upload = Upload.create(params[:upload])
       render :partial => 'crop'
     end
+    
+    def new
+      render
+    end
 
     def edit
       @upload = Upload.find(params[:id])

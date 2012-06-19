@@ -5,9 +5,6 @@ jQuery ($) ->
     csrf_token = dropbox.parents("form").find('input[name="authenticity_token"]').val()
     filefield_selector = options.filefield ? 'input[type="file"]'
     filefield = dropbox.find(filefield_selector)
-    
-    console.log "filefield is", filefield
-    
     url = options.url ? dropbox.attr("rel")
     paramname = options.paramname ? "upload[file]"
     
@@ -214,13 +211,24 @@ jQuery ($) ->
 
     complete: (e) =>
       e.preventDefault()
-      @scaler.remove()
-      @overflow.remove()
+      @scaler.hide()
+      @overflow.hide()
       @preview.unbind "mousedown", @drag
       @preview.css "cursor", 'auto'
       @preview.fadeTo "slow", 1
-      @container.find(".range_marker").remove()
+      @container.find(".range_marker").hide()
       @resetControls()
+      @controls.find(".recrop").removeClass('unavailable').unbind('click').bind "click", @resume
+    
+    resume: (e) =>
+      e.preventDefault()
+      @scaler.show()
+      @overflow.show()
+      @preview.bind "mousedown", @drag
+      @preview.css "cursor", 'move'
+      @preview.fadeTo "fast", 0.9
+      @container.find(".range_marker").show()
+      @setControls()
 
     setControls: =>
       @controls.find(".edit").hide()
@@ -295,4 +303,10 @@ jQuery ($) ->
 
     remove: =>
       @slider.remove()
+    
+    hide: =>
+      @slider.hide()
+
+    show: =>
+      @slider.show()
       

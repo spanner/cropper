@@ -52,6 +52,8 @@ jQuery ($) ->
       return false
     files_count = files.length
     upload()
+    e.preventDefault()
+    false
 
   getBuilder = (filename, filedata, boundary) ->
     dashdash = "--"

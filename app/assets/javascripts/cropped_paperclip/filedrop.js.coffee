@@ -35,6 +35,7 @@ jQuery ($) ->
   files = undefined
   
   drop = (e) ->
+    e.preventDefault()
     opts.drop e
     files = e.dataTransfer.files
     unless Modernizr.filereader && files?
@@ -42,17 +43,16 @@ jQuery ($) ->
       return false
     files_count = files.length
     upload()
-    e.preventDefault()
     false
 
   pick = (e, filefield) ->
+    e.preventDefault()
     files = filefield.files
     unless Modernizr.filereader && files?
       opts.error(errors[0])
       return false
     files_count = files.length
     upload()
-    e.preventDefault()
     false
 
   getBuilder = (filename, filedata, boundary) ->

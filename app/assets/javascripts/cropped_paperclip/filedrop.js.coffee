@@ -20,7 +20,10 @@
 #       Future-compliant with HTML5 spec (will work with Webkit browsers and IE9)
 #  Usage:
 #      See README at project homepage
- 
+
+Modernizr.addTest 'filereader', ->
+  !!(window.File && window.FileList && window.FileReader)
+
 jQuery ($) ->
   jQuery.event.props.push "dataTransfer"
 
@@ -34,8 +37,9 @@ jQuery ($) ->
   drop = (e) ->
     opts.drop e
     files = e.dataTransfer.files
-    unless files?
-      opts.error errors[0]
+    console.log ">> e.dataTransfer.files is", files
+    if Modernizr.filereader && files?
+      opts.error(errors[0])
       return false
     files_count = files.length
     upload()

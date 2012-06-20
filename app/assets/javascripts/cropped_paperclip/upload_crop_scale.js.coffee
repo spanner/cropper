@@ -26,14 +26,17 @@ jQuery ($) ->
           when "BrowserNotSupported"
             auth = $('input[name="authenticity_token"]').clone()
             form = $('<form id="uform" method="post" enctype="multipart/form-data" />').append(auth)
-            iframe = $('<iframe id="uframe" />')
-            $("body").append iframe
+            iframe = $('<iframe id="uframe" />').appendTo($('body'))
             newff = filefield.clone()
             filefield.before(newff).attr("name", paramname)
-            form.append(filefield).appendTo("body").attr("action", url).attr "target", iframe.attr("id")
-            filefield = newff.change((e) ->
+            form.append(filefield).appendTo("body").attr("action", url).attr("target", "uframe")
+
+            console.log "falling back to iframe upload", form, iframe
+
+            newff.change((e) ->
               dropbox.trigger "pick", filefield[0]
             )
+            filefield = newff
             iframe.bind "load", () ->
               response = iframe[0].contentWindow.document.body.innerHTML
               if response and response isnt ""

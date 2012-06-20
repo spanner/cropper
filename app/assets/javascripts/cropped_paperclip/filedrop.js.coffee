@@ -34,7 +34,7 @@ jQuery ($) ->
   drop = (e) ->
     opts.drop e
     files = e.dataTransfer.files
-    if files is null or files is `undefined`
+    unless files?
       opts.error errors[0]
       return false
     files_count = files.length

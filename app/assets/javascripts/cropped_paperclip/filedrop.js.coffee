@@ -37,8 +37,7 @@ jQuery ($) ->
   drop = (e) ->
     opts.drop e
     files = e.dataTransfer.files
-    console.log ">> e.dataTransfer.files is", files
-    if Modernizr.filereader && files?
+    unless Modernizr.filereader && files?
       opts.error(errors[0])
       return false
     files_count = files.length
@@ -48,6 +47,9 @@ jQuery ($) ->
 
   pick = (e, filefield) ->
     files = filefield.files
+    unless Modernizr.filereader && files?
+      opts.error(errors[0])
+      return false
     files_count = files.length
     upload()
 

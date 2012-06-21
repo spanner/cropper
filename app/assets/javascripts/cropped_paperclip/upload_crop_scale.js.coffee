@@ -26,7 +26,7 @@ jQuery ($) ->
           when "BrowserNotSupported"
             auth = $('input[name="authenticity_token"]').clone()
             form = $('<form id="uform" method="post" enctype="multipart/form-data" />').append(auth)
-            iframe = $('<iframe id="uframe" />').appendTo($('body'))
+            iframe = $('#uframe')
             newff = filefield.clone()
             filefield.before(newff).attr("name", paramname)
             form.append(filefield).appendTo("body").attr("action", url).attr("target", "uframe")
@@ -44,14 +44,21 @@ jQuery ($) ->
                 iframe.remove()
                 form.remove()
 
+            console.log "posting form", form, "into iframe", iframe
+            console.log "form.target is ", form.attr('target')
+
             form.submit()
             dropbox.find(".waiter").show()
+
           when "TooManyFiles"
             alert "You can only upload 1 file."
-          when "FileTooLarge"
-            alert file.name + " is too large! Files up to 10MB are allowed."
-          else
 
+          when "FileTooLarge"
+            alert "#{file.name} is too large! Files up to 10MB are allowed"
+            
+          else
+            alert "#{file.name} caused an unknown error: #{err}"
+            
       dragOver: ->
         dropbox.addClass "hover"
 

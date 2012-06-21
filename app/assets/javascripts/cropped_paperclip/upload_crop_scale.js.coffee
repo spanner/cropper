@@ -9,8 +9,8 @@ jQuery ($) ->
     paramname = options.paramname ? "upload[file]"
     
     finisher = (i, file, response, time) ->
-      dropbox.find("div.progress_holder").remove()
-      dropbox.find("div.waiter").remove()
+      dropbox.find(".progress_holder").remove()
+      dropbox.find(".waiter").remove()
       new Cropper(response, dropbox)
 
     dropbox.filedrop

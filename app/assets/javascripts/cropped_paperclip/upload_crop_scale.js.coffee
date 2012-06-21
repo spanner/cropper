@@ -26,7 +26,7 @@ jQuery ($) ->
           when "BrowserNotSupported"
             auth = $('input[name="authenticity_token"]').clone()
             form = $('<form id="uform" method="post" enctype="multipart/form-data" />').append(auth)
-            iframe = $('#uframe')
+            iframe = $('<iframe id="uframe" name="uframe" />').appendTo($('body'))
             newff = filefield.clone()
             filefield.before(newff).attr("name", paramname)
             form.append(filefield).appendTo("body").attr("action", url).attr("target", "uframe")

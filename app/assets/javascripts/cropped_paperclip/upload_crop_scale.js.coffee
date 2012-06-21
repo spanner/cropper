@@ -30,9 +30,6 @@ jQuery ($) ->
             newff = filefield.clone()
             filefield.before(newff).attr("name", paramname)
             form.append(filefield).appendTo("body").attr("action", url).attr("target", "uframe")
-
-            console.log "falling back to iframe upload", form, iframe
-
             newff.change((e) ->
               dropbox.trigger "pick", filefield[0]
             )
@@ -43,9 +40,6 @@ jQuery ($) ->
                 finisher.call this, null, null, response, null
                 iframe.remove()
                 form.remove()
-
-            console.log "posting form", form, "into iframe", iframe
-            console.log "form.target is ", form.attr('target')
 
             form.submit()
             dropbox.find(".waiter").show()

@@ -41,8 +41,12 @@ jQuery ($) ->
                 iframe.remove()
                 form.remove()
 
-            form.submit()
+            console.log "showing", dropbox.find(".waiter"), "hiding", dropbox.find(".instructions"), "and fading", dropbox.find(".img")
+
+            dropbox.find(".instructions").hide()
+            dropbox.find(".img").fadeTo('slow', 0.1)
             dropbox.find(".waiter").show()
+            form.submit()
 
           when "TooManyFiles"
             alert "You can only upload 1 file."
@@ -192,10 +196,10 @@ jQuery ($) ->
       @fields.find("input.ol").val @left
 
     showOverflow: =>
-      @overflow.show()
+      @overflow.fadeTo('normal', 0.3)
 
     hideOverflow: =>
-      @overflow.hide()
+      @overflow.fadeOut('normal')
 
     setOverflow: (argument) =>
       @overflow.css
@@ -216,10 +220,9 @@ jQuery ($) ->
     complete: (e) =>
       e.preventDefault()
       @scaler.hide()
-      @overflow.hide()
+      @hideOverflow()
       @preview.unbind "mousedown", @drag
       @preview.css "cursor", 'auto'
-      @preview.fadeTo "slow", 1
       @container.find(".range_marker").hide()
       @resetControls()
       @controls.find(".recrop").removeClass('unavailable').unbind('click').bind "click", @resume
@@ -227,10 +230,9 @@ jQuery ($) ->
     resume: (e) =>
       e.preventDefault()
       @scaler.show()
-      @overflow.show()
+      @showOverflow()
       @preview.bind "mousedown", @drag
       @preview.css "cursor", 'move'
-      @preview.fadeTo "fast", 0.9
       @container.find(".range_marker").show()
       @setControls()
 

@@ -41,8 +41,6 @@ jQuery ($) ->
                 iframe.remove()
                 form.remove()
 
-            console.log "showing", dropbox.find(".waiter"), "hiding", dropbox.find(".instructions"), "and fading", dropbox.find(".img")
-
             dropbox.find(".instructions").hide()
             dropbox.find(".img").fadeTo('slow', 0.1)
             dropbox.find(".waiter").show()

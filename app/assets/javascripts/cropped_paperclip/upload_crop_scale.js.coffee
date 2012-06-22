@@ -142,8 +142,8 @@ jQuery ($) ->
 
     drag: (e) =>
       e.preventDefault()
-      $(window).bind "mousemove", @move
-      $(window).bind "mouseup", @drop
+      $(document).bind "mousemove", @move
+      $(document).bind "mouseup", @drop
       @lastY = e.pageY
       @lastX = e.pageX
       @showOverflow()
@@ -186,8 +186,8 @@ jQuery ($) ->
       @preview.css "left", @left
 
     drop: (e) =>
-      $(window).unbind "mousemove", @move
-      $(window).unbind "mouseup", @drop
+      $(document).unbind "mousemove", @move
+      $(document).unbind "mouseup", @drop
       @move e
       @hideOverflow()
       @fields.find("input.ot").val @top
@@ -268,15 +268,15 @@ jQuery ($) ->
       console.log "scaler drag"
       e.preventDefault()
       @lastX = e.pageX
-      console.log "@lastX", @lastX
-      $(window).bind "mousemove", @move
-      $(window).bind "mouseup", @drop
+      console.log "@lastX: ", @lastX
+      $(document).bind "mousemove", @move
+      $(document).bind "mouseup", @drop
       @callbacks.drag?.call @, @value
 
     move: (e) =>
       console.log "scaler move"
       deltaX = e.pageX - @lastX
-      console.log "deltaX", deltaX
+      console.log "deltaX: ", deltaX
       @.pos = @pos + e.pageX - @lastX
       @.pos = 0  if @pos < 0
       @.pos = 400  if @pos > 400
@@ -288,8 +288,8 @@ jQuery ($) ->
     drop: (e) =>
       console.log "scaler drop"
       @move e
-      $(window).unbind "mousemove", @move
-      $(window).unbind "mouseup", @drop
+      $(document).unbind "mousemove", @move
+      $(document).unbind "mouseup", @drop
       @callbacks.drop?.call @, @value
 
     recalculate: =>

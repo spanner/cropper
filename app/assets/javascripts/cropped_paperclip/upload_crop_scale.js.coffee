@@ -149,6 +149,7 @@ jQuery ($) ->
       @showOverflow()
 
     move: (e) =>
+      e.preventDefault()
       @moveTop e.pageY - @lastY
       @moveLeft e.pageX - @lastX
       @lastY = e.pageY
@@ -265,18 +266,14 @@ jQuery ($) ->
       @input.before(@slider).hide()
 
     drag: (e) =>
-      console.log "scaler drag"
       e.preventDefault()
       @lastX = e.pageX
-      console.log "@lastX: ", @lastX
       $(document).bind "mousemove", @move
       $(document).bind "mouseup", @drop
       @callbacks.drag?.call @, @value
 
     move: (e) =>
-      console.log "scaler move"
       deltaX = e.pageX - @lastX
-      console.log "deltaX: ", deltaX
       @.pos = @pos + e.pageX - @lastX
       @.pos = 0  if @pos < 0
       @.pos = 400  if @pos > 400
@@ -286,7 +283,6 @@ jQuery ($) ->
       @callbacks.move?.call @, @value
 
     drop: (e) =>
-      console.log "scaler drop"
       @move e
       $(document).unbind "mousemove", @move
       $(document).unbind "mouseup", @drop

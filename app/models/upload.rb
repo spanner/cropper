@@ -9,6 +9,7 @@ class Upload < ActiveRecord::Base
                     :processors => lambda { |instance| instance.precrop_processors },
                     :styles => lambda { |attachment| attachment.instance.precrop_styles }
 
+  attr_accessible :file
 
   # To change precrop dimensions or other thumbnail properties, just monkeypatch this method.
   #

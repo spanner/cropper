@@ -56,14 +56,12 @@ module CroppedPaperclip
 
         # The processor will first scale the image to the width that is specified by the scale_width property of the instance
         :scale => lambda { |att| 
-          STDERR.puts "scale #{att.inspect}"
           width = att.instance.send :"#{attachment_name}_scale_width"
           "#{width || 0}x"
         },
 
         # ...then perform the crop described by the width, height, offset_top and offset_left properties of the instance.
         :crop_and_offset => lambda { |att| 
-          STDERR.puts "crop_and_offset #{att.inspect}"
           width, height = options[:geometry].split('x')
           left = att.instance.send :"#{attachment_name}_offset_left" || 0
           top = att.instance.send :"#{attachment_name}_offset_top"

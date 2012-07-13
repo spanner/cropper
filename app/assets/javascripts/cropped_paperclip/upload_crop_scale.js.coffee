@@ -236,6 +236,7 @@ jQuery ($) ->
       @setControls()
 
     setControls: =>
+      @controls.show()
       @controls.find(".edit").hide()
       @controls.find(".cancel").show()
       @controls.find("a.picker").addClass("unavailable").unbind "click"

@@ -97,7 +97,7 @@ module CroppedPaperclip
       # the uploaded file. Even if it's the same file as before, the effect is to trigger post-processing again and apply the current crop and scale values.
       #
       define_method :"read_#{attachment_name}_upload" do
-        if self.send(:"reprocess_#{attachment_name}?") && upload = self.send(:"#{attachment_name}_upload")  
+        if self.send(:"reprocess_#{attachment_name}?") && upload = self.send(:"#{attachment_name}_upload")
           self.send :"#{attachment_name}=", upload.file  
         end
       end

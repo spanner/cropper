@@ -17,7 +17,7 @@ class Upload < ActiveRecord::Base
     {
       :icon => { :geometry => "40x40#" },
       :thumb => { :geometry => "100x100#" },
-      :precrop => { :geometry => "1600x3000>" }
+      :precrop => { :geometry => "1600x3000" }
     }
   end
 

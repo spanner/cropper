@@ -39,7 +39,7 @@ module CroppedPaperclip
         raise RuntimeError, "has_upload(#{attachment_name}) called on class #{self.to_s} but we have no #{attachment_name}_upload_id column"
       end
 
-      options.reverse_merge!(:geometry => "640x960#", :cropped => true, :default_url => "/assets/#{attachment_name}_missing_:style.png", :whiny => true)
+      options.reverse_merge!(:geometry => "640x960#", :cropped => true, :whiny => true)
       options[:geometry].sub!(/\D*$/, '') if options[:cropped]
       # raise here if geometry is not useable
 

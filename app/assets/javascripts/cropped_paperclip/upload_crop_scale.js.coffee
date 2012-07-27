@@ -179,20 +179,20 @@ jQuery ($) ->
       @top = 0 if @top > 0
       @top = @toplimit if @top < @toplimit
       @preview.css "top", @top
+      @fields.find("input.ot").val @top
 
     moveLeft: (x) =>
       @left = @left + x
       @left = 0  if @left > 0
       @left = @leftlimit  if @left < @leftlimit
       @preview.css "left", @left
+      @fields.find("input.ol").val @left
 
     drop: (e) =>
       $(document).unbind "mousemove", @move
       $(document).unbind "mouseup", @drop
       @move e
       @hideOverflow()
-      @fields.find("input.ot").val @top
-      @fields.find("input.ol").val @left
 
     showOverflow: =>
       @overflow.fadeTo('normal', 0.3)

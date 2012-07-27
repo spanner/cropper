@@ -126,5 +126,45 @@ module CroppedPaperclip
       end
 
     end
+
+    ## Delay post-processing
+
+    def delay_post_processing(attachment_name=:image)
+      send(:"before_#{attachment_name}_post_process", :"defer_#{attachment_name}_post_processing")
+      after_save(:"resume_#{attachment_name}_post_processing")
+
+      # There are too many thumbnail styles in this class. We can't make the user wait while they are processed,
+      # so the whole job of thumbnailing is spun off into a delayed_job. Since the main publication page displays
+      # the :original style, we can show the user her public page while the rest of the thumbnails are still being
+      # processed.
+      #
+      # The usual post_processing routine is abandoned when we return false from this call.
+      #
+      define_method :"defer_#{attachment_name}_post_processing" do
+        if send(:"reprocess_#{attachment_name}?") && !send(:"awaiting_#{attachment_name}_processing?")
+          send(:"awaiting_#{attachment_name}_processing", true)
+          false
+        end
+      end
+
+      # The delayed job is created just by interposing the `delay` method in a call to `process_image_styles!`. The effect
+      # is to serialize this object and that call to the database and resume it later when the job runner picks it up. 
+      # We can't do  that until the publication object has an id, so the call is made from an after_save handler.
+      #
+      define_method :"resume_#{attachment_name}_post_processing" do
+        if send(:"reprocess_#{attachment_name}?") && send(:"awaiting_#{attachment_name}_processing?")
+          self.delay.send(:"process_#{attachment_name}_styles!")
+        end
+      end
+
+      # This is the eventual processing step, to which the delayed job object is just a sort of pointer.
+      # It retrieves the original image from S3 and applies the processing styles.
+      #
+      define_method :"process_#{attachment_name}_styles!" do
+        send(attachment_name).reprocess! 
+        update_column(:"awaiting_#{attachment_name}_processing", false)
+      end
+      
+    end
   end
 end

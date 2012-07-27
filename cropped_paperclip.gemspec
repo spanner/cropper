@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rails", "~> 3.2.0"
   s.add_dependency('paperclip', '~> 3.0.4')
+  s.add_dependency('delayed_job_active_record')
 
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec-rails"

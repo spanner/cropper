@@ -106,7 +106,7 @@ jQuery ($) ->
     send = (e) ->
       e.target.index = getIndexBySize(e.total)  if e.target.index is `undefined`
       xhr = new XMLHttpRequest()
-      upload = xhr.upload
+      ul = xhr.upload
       file = files[e.target.index]
       index = e.target.index
       start_time = new Date().getTime()
@@ -117,13 +117,13 @@ jQuery ($) ->
         builder = getBuilder(newName, e.target.result, boundary)
       else
         builder = getBuilder(file.name, e.target.result, boundary)
-      upload.index = index
-      upload.file = file
-      upload.downloadStartTime = start_time
-      upload.currentStart = start_time
-      upload.currentProgress = 0
-      upload.startData = 0
-      upload.addEventListener "progress", progress, false
+      ul.index = index
+      ul.file = file
+      ul.downloadStartTime = start_time
+      ul.currentStart = start_time
+      ul.currentProgress = 0
+      ul.startData = 0
+      ul.addEventListener "progress", progress, false
       xhr.open "POST", opts.url, true
       xhr.setRequestHeader "content-type", "multipart/form-data; boundary=" + boundary
       xhr.sendAsBinary builder

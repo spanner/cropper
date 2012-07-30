@@ -259,6 +259,8 @@ jQuery ($) ->
       @min = parseInt(@input.attr("min"), 10)
       @slider = $("<span class=\"slider\"><span class=\"scale\"><span class=\"marker\"></span></span></span>")
       @scale = @slider.find(".scale")
+      @scale_width = 150
+      
       @marker = @slider.find(".marker")
       @lastX = 0
 
@@ -291,8 +293,7 @@ jQuery ($) ->
 
     recalculate: =>
       origin = @min
-      scale_width = 150
-      pixel_proportion = (@pos / scale_width)
+      pixel_proportion = (@pos / @scale_width)
       value_width = @max - @min
       @value = Math.round(origin + (value_width * pixel_proportion))
       @input.val(@value)
@@ -300,8 +301,7 @@ jQuery ($) ->
     reposition: =>
       origin = @min
       value_proportion = (@value - origin) / (@max - origin)
-      scale_width = 150
-      @pos = Math.round(scale_width * value_proportion)
+      @pos = Math.round(@scale_width * value_proportion)
       @placeMarker @pos
 
     placeMarker: (x) =>

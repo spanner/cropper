@@ -1,89 +1,93 @@
 jQuery ($) ->
   $.fn.uploader = (opts) ->
-    options = $.extend {}, opts
-    dropbox = $(this)
-    csrf_token = dropbox.parents("form").find('input[name="authenticity_token"]').val()
-    filefield_selector = options.filefield ? 'input[type="file"]'
-    filefield = dropbox.find(filefield_selector)
-    url = options.url ? dropbox.attr("data-upload-path") ? dropbox.attr("rel")
-    paramname = options.paramname ? "upload[file]"
+    @each ->
+      options = $.extend {}, opts
+      dropbox = $(@)
+      csrf_token = dropbox.parents("form").find('input[name="authenticity_token"]').val()
+      filefield_selector = options.filefield ? 'input[type="file"]'
+      filefield = dropbox.find(filefield_selector)
+      url = options.url ? dropbox.attr("data-upload-path") ? dropbox.attr("rel")
     
-    finisher = (i, file, response, time) ->
-      dropbox.find(".progress_holder").remove()
-      dropbox.find(".waiter").remove()
-      new Cropper(response, dropbox)
+      console.log "upload url: ", url, "from option", options.url, "data-upload-path", dropbox.attr("data-upload-path"), "rel", dropbox.attr("rel")
+    
+      paramname = options.paramname ? "upload[file]"
+    
+      finisher = (i, file, response, time) ->
+        dropbox.find(".progress_holder").remove()
+        dropbox.find(".waiter").remove()
+        new Cropper(response, dropbox)
 
-    dropbox.filedrop
-      maxfiles: 1
-      maxfilesize: 10
-      url: url
-      paramname: paramname
-      data:
-        authenticity_token: csrf_token
+      dropbox.filedrop
+        maxfiles: 1
+        maxfilesize: 10
+        url: url
+        paramname: paramname
+        data:
+          authenticity_token: csrf_token
 
-      error: (err, file) ->
-        switch err
-          when "BrowserNotSupported"
-            auth = $('input[name="authenticity_token"]').clone()
-            form = $('<form id="uform" method="post" enctype="multipart/form-data" />').append(auth)
-            iframe = $('<iframe id="uframe" name="uframe" />').appendTo($('body'))
-            newff = filefield.clone()
-            filefield.before(newff).attr("name", paramname)
-            form.append(filefield).appendTo("body").attr("action", url).attr("target", "uframe")
-            newff.change((e) ->
-              dropbox.trigger "pick", filefield[0]
-            )
-            filefield = newff
-            iframe.bind "load", () ->
-              response = iframe[0].contentWindow.document.body.innerHTML
-              if response and response isnt ""
-                finisher.call this, null, null, response, null
-                iframe.remove()
-                form.remove()
+        error: (err, file) ->
+          switch err
+            when "BrowserNotSupported"
+              auth = $('input[name="authenticity_token"]').clone()
+              form = $('<form id="uform" method="post" enctype="multipart/form-data" />').append(auth)
+              iframe = $('<iframe id="uframe" name="uframe" />').appendTo($('body'))
+              newff = filefield.clone()
+              filefield.before(newff).attr("name", paramname)
+              form.append(filefield).appendTo("body").attr("action", url).attr("target", "uframe")
+              newff.change((e) ->
+                dropbox.trigger "pick", filefield[0]
+              )
+              filefield = newff
+              iframe.bind "load", () ->
+                response = iframe[0].contentWindow.document.body.innerHTML
+                if response and response isnt ""
+                  finisher.call this, null, null, response, null
+                  iframe.remove()
+                  form.remove()
 
-            dropbox.find(".instructions").hide()
-            dropbox.find(".img").fadeTo('slow', 0.1)
-            dropbox.find(".waiter").show()
-            form.submit()
+              dropbox.find(".instructions").hide()
+              dropbox.find(".img").fadeTo('slow', 0.1)
+              dropbox.find(".waiter").show()
+              form.submit()
 
-          when "TooManyFiles"
-            alert "You can only upload 1 file."
+            when "TooManyFiles"
+              alert "You can only upload 1 file."
 
-          when "FileTooLarge"
-            alert "#{file.name} is too large! Files up to 10MB are allowed"
+            when "FileTooLarge"
+              alert "#{file.name} is too large! Files up to 10MB are allowed"
             
-          else
-            alert "#{file.name} caused an unknown error: #{err}"
+            else
+              alert "#{file.name} caused an unknown error: #{err}"
             
-      dragOver: ->
-        dropbox.addClass "hover"
+        dragOver: ->
+          dropbox.addClass "hover"
 
-      dragLeave: ->
-        dropbox.removeClass "hover"
+        dragLeave: ->
+          dropbox.removeClass "hover"
 
-      beforeEach: (file) ->
-        dropbox.removeClass "hover"
-        unless file.type.match(/^image\//)
-          alert "Sorry: only image files are allowed!"
-          false
+        beforeEach: (file) ->
+          dropbox.removeClass "hover"
+          unless file.type.match(/^image\//)
+            alert "Sorry: only image files are allowed!"
+            false
 
-      afterAll: ->
-        filefield.val ""
+        afterAll: ->
+          filefield.val ""
 
-      uploadStarted: (i, file, len) ->
-        dropbox.find("img").fadeTo "fast", 0.5
-        dropbox.find("p.instructions").hide()
-        dropbox.append "<div class=\"progress_holder\"><div class=\"progress\"></div><div class=\"commentary\">0% uploaded</div></div>"
+        uploadStarted: (i, file, len) ->
+          dropbox.find("img").fadeTo "fast", 0.5
+          dropbox.find("p.instructions").hide()
+          dropbox.append "<div class=\"progress_holder\"><div class=\"progress\"></div><div class=\"commentary\">0% uploaded</div></div>"
 
-      progressUpdated: (i, file, progress) ->
-        dropbox.find("div.progress").width progress + "%"
-        dropbox.find("div.commentary").text progress + "% uploaded"
+        progressUpdated: (i, file, progress) ->
+          dropbox.find("div.progress").width progress + "%"
+          dropbox.find("div.commentary").text progress + "% uploaded"
 
-      uploadFinished: finisher
+        uploadFinished: finisher
 
-    dropbox.find("a.picker").picker()
-    filefield.change (e) ->
-      dropbox.trigger "pick", filefield[0]
+      dropbox.find("a.picker").picker()
+      filefield.change (e) ->
+        dropbox.trigger "pick", filefield[0]
     @
     
   $.fn.recropper = ->

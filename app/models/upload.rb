@@ -107,7 +107,10 @@ private
   # should be in place. We grab dimensions from the temp file and calculate thumbnail dimensions later, on demand.
   #
   def read_dimensions
-    if file = self.file.queued_for_write[:original]
+    if uploaded_file = self.file.queued_for_write[:original]
+      file = uploaded_file.send :destination
+      Rails.logger.warn "+++ getting geometry from queued file #{file.inspect}."
+      Rails.logger.warn "--- File exist? #{File.exist?(file).inspect}"
       geometry = Paperclip::Geometry.from_file(file)
       self.original_width = geometry.width
       self.original_height = geometry.height

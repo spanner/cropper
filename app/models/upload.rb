@@ -4,8 +4,6 @@
 #
 class Upload < ActiveRecord::Base
   has_attached_file :file,
-                    :path => ":rails_root/public/system/:class/:attachment/:id/:style/:filename",
-                    :url => "/system/:class/:attachment/:id/:style/:filename",
                     :processors => lambda { |instance| instance.precrop_processors },
                     :styles => lambda { |attachment| attachment.instance.precrop_styles }
 
@@ -15,7 +13,6 @@ class Upload < ActiveRecord::Base
   #
   def precrop_styles
     {
-      :icon => { :geometry => "40x40#" },
       :thumb => { :geometry => "100x100#" },
       :precrop => { :geometry => "1600x3000" }
     }

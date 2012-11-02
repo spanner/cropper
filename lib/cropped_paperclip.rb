@@ -7,11 +7,6 @@ require "cropped_paperclip/engine"
 require 'cropped_paperclip/glue'
 
 module CroppedPaperclip
-  mattr_accessor :attachment_path
-  mattr_accessor :attachment_url
-  attachment_path = ":rails_root/public/system/:class/:attachment/:id/:style/:filename"
-  attachment_url = "/system/:class/:attachment/:id/:style/:filename"
-  
   # CroppedPaperclip::ClassMethods is included into ActiveRecord::Base in the same way as the Paperclip module. 
   # It adds a `has_upload` class method that defines an attachment and adds several instance methods 
   # that will return the values that determine its cropping. Those values are usually but not  
@@ -77,7 +72,7 @@ module CroppedPaperclip
       # [uploads](/app/models/upload.html) are the raw image files uploaded by this person. 
       # They are held separately as the basis for repeatable (and shareable) image assignment.
       #
-      belongs_to :"#{attachment_name}_upload", :class_name => "Upload"
+      belongs_to :"#{attachment_name}_upload", :class_name => "CroppedPaperclip::Upload"
       before_save :"read_#{attachment_name}_upload"
 
       ### Attachment

@@ -1,4 +1,15 @@
 jQuery ($) ->
+
+  $.fn.detach_upload = ->
+    @click (e) ->
+      e.preventDefault() if e
+      # removes the current image
+      $(@).siblings('a.recrop').remove()
+      # removes the form field giving upload id, so that we can make a new one
+      $(@).parents('div.dropbox').siblings('input[type="hidden"]').remove()
+      $(@).remove()
+
+
   $.fn.uploader = (opts) ->
     @each ->
       options = $.extend {}, opts
@@ -134,6 +145,8 @@ jQuery ($) ->
         move: @resize
         drop: @hideOverflow
 
+      @accepter = @container.find('a.accept')
+      @detacher = @container.find('a.detach')
       @controls.find(".cancel a").bind "click", @cancel
       @preview.bind "mousedown", @drag
 
@@ -220,16 +233,21 @@ jQuery ($) ->
     complete: (e) =>
       e.preventDefault()
       @scaler.hide()
+      @accepter.hide()
       @hideOverflow()
       @preview.unbind "mousedown", @drag
       @preview.css "cursor", 'auto'
       @container.find(".range_marker").hide()
       @resetControls()
       @controls.find(".recrop").removeClass('unavailable').unbind('click').bind "click", @resume
-    
+      @preview.wrap($('<a href="#" class="recrop" />'))
+      @preview.parent().bind "click", @resume
+      
     resume: (e) =>
       e.preventDefault()
       @scaler.show()
+      @accepter.show()
+      @detacher.show()
       @showOverflow()
       @preview.bind "mousedown", @drag
       @preview.css "cursor", 'move'
@@ -242,12 +260,15 @@ jQuery ($) ->
       @controls.find(".cancel").show()
       @controls.find("a.picker").addClass("unavailable").unbind "click"
       @controls.find(".save a").removeClass("unavailable").bind "click", @complete
+      @accepter.bind "click", @complete
+      @detacher.bind "click", @cancel
 
     resetControls: =>
       @controls.find(".cancel").hide()
       @controls.find(".edit").show()
       @controls.find("a.picker").removeClass("unavailable").picker()
       @controls.find(".save a").addClass("unavailable").unbind("click")
+      @accepter.unbind "click", @complete
 
 
   class Scaler
@@ -260,8 +281,7 @@ jQuery ($) ->
       @min = parseInt(@input.attr("min"), 10)
       @slider = $("<span class=\"slider\"><span class=\"scale\"><span class=\"marker\"></span></span></span>")
       @scale = @slider.find(".scale")
-      @scale_width = 150
-      
+      @scale_width = 240
       @marker = @slider.find(".marker")
       @lastX = 0
 
@@ -280,7 +300,7 @@ jQuery ($) ->
       deltaX = e.pageX - @lastX
       @.pos = @pos + e.pageX - @lastX
       @.pos = 0  if @pos < 0
-      @.pos = 400  if @pos > 400
+      @.pos = @scale_width  if @pos > @scale_width
       @.placeMarker(@pos)
       @.recalculate()
       @.lastX = e.pageX
@@ -317,3 +337,4 @@ jQuery ($) ->
     show: =>
       @slider.show()
       
+

@@ -15,7 +15,7 @@ module CroppedPaperclip
     has_attached_file :file,
                       :processors => [:thumbnail],
                       :styles => lambda { |attachment| attachment.instance.precrop_styles },
-                      :fog_directory => fog_directory
+                      :fog_directory => 'tlms-public'
 
 
     def precrop_styles

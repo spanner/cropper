@@ -10,15 +10,21 @@ module CroppedPaperclip
       :thumb => { :geometry => "100x100#" },
       :precrop => { :geometry => "1600x3000" }
     }
-    cattr_accessor :precrop_styles
+    cattr_accessor :precrop_styles, :fog_directory
     
     has_attached_file :file,
                       :processors => [:thumbnail],
-                      :styles => lambda { |attachment| attachment.instance.precrop_styles }
+                      :styles => lambda { |attachment| attachment.instance.precrop_styles },
+                      :fog_directory => lambda { |attachment| attachment.instance.fog_directory }
+                      
 
 
     def precrop_styles
       self.class.precrop_styles
+    end
+
+    def fog_directory
+      self.class.fog_directory
     end
   
     validates :file, :attachment_presence => true

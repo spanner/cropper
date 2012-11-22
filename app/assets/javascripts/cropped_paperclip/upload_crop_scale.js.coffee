@@ -15,7 +15,7 @@ jQuery ($) ->
       options = $.extend {}, opts
       dropbox = $(@)
       csrf_token = dropbox.parents("form").find('input[name="authenticity_token"]').val()
-      filefield_selector = options.filefield ? 'input[type="file"]'
+      filefield_selector = options.filefield ? 'input.file_upload'
       filefield = dropbox.find(filefield_selector)
       url = options.url ? dropbox.attr("data-upload-path") ? dropbox.attr("rel")    
       paramname = options.paramname ? "upload[file]"

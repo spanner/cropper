@@ -93,7 +93,7 @@ jQuery ($) ->
 
         uploadFinished: finisher
 
-      dropbox.find("a.picker").picker()
+      dropbox.find("a.picker").picker(filefield)
       filefield.change (e) ->
         dropbox.trigger "pick", filefield[0]
     @
@@ -108,11 +108,12 @@ jQuery ($) ->
       ), "html"
     @
 
-  $.fn.picker = ->
+  $.fn.picker = (filefield) ->
     @click (e) ->
       e.preventDefault()
       e.stopPropagation()
-      $("#file_upload").trigger('click')
+      filefield ?= $("input.file_upload")
+      filefield.trigger('click')
     @
 
   $.fn.click_proxy = (target_selector) ->

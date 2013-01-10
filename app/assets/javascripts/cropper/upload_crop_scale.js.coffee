@@ -19,6 +19,13 @@ jQuery ($) ->
       filefield = dropbox.find(filefield_selector)
       url = options.url ? dropbox.attr("data-upload-path") ? dropbox.attr("rel")    
       paramname = options.paramname ? "upload[file]"
+      
+      
+      
+      
+      
+      
+      
     
       finisher = (i, file, response, time) ->
         dropbox.find(".progress_holder").remove()

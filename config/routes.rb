@@ -1,3 +1,3 @@
-Rails.application.routes.draw do
-  resources :uploads, :controller => 'cropped_paperclip/uploads'
+Cropper::Engine.routes.draw do
+  resources :uploads
 end

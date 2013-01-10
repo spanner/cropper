@@ -1,5 +1,5 @@
 require 'spec_helper'
 
-describe CroppedPaperclip::UploadsController do
+describe Cropper::UploadsController do
 
 end

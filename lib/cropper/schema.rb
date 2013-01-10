@@ -1,4 +1,4 @@
-module CroppedPaperclip
+module Cropper
   # Provides helpers that can be used in migrations. 
   # Copied from, and often makes calls on, the equivalent file in Paperclip.
   #
@@ -21,7 +21,7 @@ module CroppedPaperclip
     end
 
     module TableDefinition
-      def uploadable_attachment(*attachment_names)
+      def cropped_attachment(*attachment_names)
         attachment_names.each do |attachment_name|
           UPLOAD_COLUMNS.each_pair do |column_name, column_type|
             column("#{attachment_name}_#{column_name}", column_type)

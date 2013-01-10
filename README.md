@@ -1,4 +1,4 @@
-# CroppedPaperclip
+# Cropper
 
 This is a rails-specific gem. It uses paperclip to provide a general-purpose upload-and-crop mechanism 
 in which a single upload object (with attached file) can be shared between any number of models, and

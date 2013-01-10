@@ -1,4 +1,4 @@
-module CroppedPaperclip
+module Cropper
   class UploadsController < ::ApplicationController
     respond_to :js
     before_filter :find_upload, :only => [:show, :edit, :destroy]

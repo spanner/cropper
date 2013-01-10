@@ -3,11 +3,12 @@ require "paperclip/validators/attachment_height_validator"
 require "paperclip/validators/attachment_width_validator"
 require "paperclip/geometry_transformation"
 require "paperclip_processors/offset_thumbnail"
-require "cropped_paperclip/engine"
-require 'cropped_paperclip/glue'
+require "cropper/engine"
+require "cropper/routing"
+require 'cropper/glue'
 
-module CroppedPaperclip
-  # CroppedPaperclip::ClassMethods is included into ActiveRecord::Base in the same way as the Paperclip module. 
+module Cropper
+  # Cropper::ClassMethods is included into ActiveRecord::Base in the same way as the Paperclip module. 
   # It adds a `has_upload` class method that defines an attachment and adds several instance methods 
   # that will return the values that determine its cropping. Those values are usually but not  
   # necessarily given by the user.
@@ -72,7 +73,7 @@ module CroppedPaperclip
       # [uploads](/app/models/upload.html) are the raw image files uploaded by this person. 
       # They are held separately as the basis for repeatable (and shareable) image assignment.
       #
-      belongs_to :"#{attachment_name}_upload", :class_name => "CroppedPaperclip::Upload"
+      belongs_to :"#{attachment_name}_upload", :class_name => "Cropper::Upload"
       before_save :"read_#{attachment_name}_upload"
 
       ### Attachment

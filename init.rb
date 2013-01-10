@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), "lib", "cropped_paperclip")
-require 'cropped_paperclip/railtie'
+require File.join(File.dirname(__FILE__), "lib", "cropper")
+require 'cropper/railtie'
 
-CroppedPaperclip::Railtie.insert
+Cropper::Railtie.insert

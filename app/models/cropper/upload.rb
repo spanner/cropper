@@ -2,7 +2,7 @@
 # We assume that even when the final destination is an S3 bucket, the initial upload
 # will be held locally.
 #
-module CroppedPaperclip
+module Cropper
   class Upload < ActiveRecord::Base
     attr_accessible :file
 

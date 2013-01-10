@@ -1,4 +1,4 @@
-module CroppedPaperclip
+module Cropper
   module ApplicationHelper
   end
 end

@@ -1,4 +1,4 @@
 # desc "Explaining what the task does"
-# task :cropped_paperclip do
+# task :cropper do
 #   # Task goes here
 # end

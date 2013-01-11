@@ -52,6 +52,7 @@ jQuery ($) ->
       opts.error(errors[0])
       return false
     files_count = files.length
+    console.log "pick", files
     upload()
     false
 

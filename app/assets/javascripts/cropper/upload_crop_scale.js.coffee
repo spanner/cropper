@@ -9,7 +9,6 @@ jQuery ($) ->
       $(@).parents('div.dropbox').siblings('input[type="hidden"]').remove()
       $(@).remove()
 
-
   $.fn.uploader = (opts) ->
     @each ->
       options = $.extend {}, opts
@@ -17,16 +16,12 @@ jQuery ($) ->
       csrf_token = dropbox.parents("form").find('input[name="authenticity_token"]').val()
       filefield_selector = options.filefield ? 'input.file_upload'
       filefield = dropbox.find(filefield_selector)
+      
+      console.log "uploader filefield", filefield
+      
       url = options.url ? dropbox.attr("data-upload-path") ? dropbox.attr("rel")    
       paramname = options.paramname ? "upload[file]"
       
-      
-      
-      
-      
-      
-      
-    
       finisher = (i, file, response, time) ->
         dropbox.find(".progress_holder").remove()
         dropbox.find(".waiter").remove()
@@ -100,7 +95,7 @@ jQuery ($) ->
 
         uploadFinished: finisher
 
-      dropbox.find("a.picker").picker()
+      dropbox.find("a.picker").picker(filefield)
       filefield.change (e) ->
         dropbox.trigger "pick", filefield[0]
     @
@@ -115,17 +110,19 @@ jQuery ($) ->
       ), "html"
     @
 
-  $.fn.picker = ->
+  $.fn.picker = (filefield) ->
     @click (e) ->
       e.preventDefault()
       e.stopPropagation()
-      $("#file_upload").trigger('click')
+      filefield.trigger('click')
     @
 
   $.fn.click_proxy = (target_selector) ->
     this.bind "click", (e) ->
       e.preventDefault()
       $(target_selector).click()
+
+
 
   class Cropper
     constructor: (response, container) ->
@@ -138,6 +135,7 @@ jQuery ($) ->
       @container.find("div.preview").remove()
       @container.find("div.img").after(@preview)
       @container.find("div.waiter").hide()
+      @container.append @preview
       @container.append @fields
       @container.before @overflow
 

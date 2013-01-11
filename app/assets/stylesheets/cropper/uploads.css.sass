@@ -1,0 +1,198 @@
+@import compass/css3
+
+$coolgrey0: #f2f0ed
+$coolgrey1: #e2e1dd
+$coolgrey2: #d6d6d4
+$coolgrey3: #cacac8
+$coolgrey4: #bdbdbd
+$coolgrey5: #b3b3b3
+$coolgrey6: #afafaf
+$coolgrey7: #9a9b9d
+$coolgrey8: #8c8d8e
+$coolgrey9: #747679
+$coolgrey10: #616265
+$coolgrey11: #4d4e53
+$rubine: #d1005d
+
+$text: #4d4e53
+$link: #ED1C24
+$hover: #9a9b9d
+$active: #d1005d
+$visited: #d3181f
+$pale: #d6d6d4
+$blue: #549dc4
+$green: #74b87a
+$input: #616265
+$error: $rubine
+$help: #e59811
+
+$dark: #616265
+$mid: #b3b3b3
+$verypale: #ebeae8
+$palest: #f5f5f5
+
+.dropbox
+  position: relative
+  width: 640px
+  height: 480px
+  overflow: hidden
+  background:
+    color: transparent
+    position: center center
+    repeat: no-repeat
+  &.hover
+    background-position: 0 - 150px
+  input
+    position: absolute
+    top: 300px
+    left: 0
+  .img
+    background:
+      color: $coolgrey0
+      repeat: no-repeat
+      position: top left
+    border: 1px solid $coolgrey1
+    a.detach
+      position: absolute
+      top: 10px
+      right: 10px
+      width: 32px
+      height: 32px
+      text-indent: 50px
+      overflow: hidden
+      background:
+        repeat: no-repeat
+        position: 0 -860px
+        image: image-url('cropper/symbols.png')
+      &:hover
+        background-color: $rubine
+    .prompt
+      text-align: center
+      padding: 55px 25px
+      a
+        color: $link
+      .note
+        color: $mid
+    &:hover, &.hover
+      .prompt
+        a
+          color: $hover
+  &.hover
+    .img
+      .prompt
+        a
+          color: $hover
+      
+  .progress_holder
+    position: absolute
+    overflow: hidden
+    top: 10%
+    left: 10%
+    width: 75%
+    height: 32px
+    border: 1px solid $mid
+    background-color: white
+    z-index: 900
+    +border-radius
+    .progress
+      position: relative
+      width: 0%
+      height: 100%
+      background-color: $active
+      background: transparent image-url('cropper/progress_stripes.png') repeat-x top left scroll
+    .commentary 
+      position: absolute
+      top: 0
+      left: 0
+      width: 100%
+      font-size: 1em
+      line-height: 1
+      padding: 1em
+      text-align: cetner
+  .waiter
+    position: absolute
+    overflow: hidden
+    top: 150px
+    left: 410px
+    width: 32px
+    height: 32px
+    background: transparent image-url('cropper/upload_spinner.gif') no-repeat center center scroll
+    display: none
+  .preview
+    position: absolute
+    top: 0
+    left: 0
+    cursor: move
+    img
+      width: 100%
+      height: 100%
+  .scaler
+    position: absolute
+    top: 100px
+    left: 55px
+    width: 240px
+    height: 40px
+    color: white
+    +text-shadow(1px, 2px, 3px, #333)
+    p.range
+      position: relative
+      margin: 0 auto
+      overflow: hidden
+      span.small, span.large
+        display: inline-block
+        width: 32px
+        height: 50px
+        background-repeat: no-repeat
+      span.small
+        background:
+          image: image-url('cropper/scale_small.png')
+          position: right center
+      span.large
+        background:
+          image: image-url('cropper/scale_large.png')
+          position: left center
+          
+      .stop
+        display: block
+        position: relative
+        border: 2px solid white
+        +box-shadow
+        float: left
+        &.min
+          width: 9px
+          height: 12px
+          margin-top: 14px
+          margin-right: 4px
+        &.max
+          width: 18px
+          height: 24px
+          margin-top: 6px
+          margin-left: 5px
+      .slider
+        display: block
+        position: relative
+        display: inline-block
+        width: 150px
+        height: 40px
+        background: transparent image-url('cropper/scale.png') no-repeat 0 20px
+        .marker
+          display: block
+          position: absolute
+          background-color: white
+          +box-shadow
+          top: 9px
+          left: 50px
+          width: 12px
+          height: 24px
+          cursor: move
+          z-index: 1000
+
+.overflow
+  position: absolute
+  overflow: hidden
+  top: 0
+  left: 0
+  +opacity(0.3)
+  img
+    width: 100%
+    height: 100%

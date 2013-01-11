@@ -1,0 +1,26 @@
+/ - upload ||= @upload
+/ - recipient = (params[:for]).to_sym
+/ 
+/ - max_w = upload.width(:precrop)
+/ - max_h = upload.height(:precrop)
+/ 
+/ - scale_w = max_w * 3 / 4
+/ - scale_h = max_h * 3 / 4
+/ - scale_l = (640 - scale_w)/2
+/ - scale_t = (480 - scale_h)/2
+/ 
+/ .cropper
+/   .preview{:style => "width: #{scale_w}px; height: #{scale_h}px; top: #{scale_t}px; left: #{scale_l}px"}
+/     %img{:src => upload.file.url(:precrop)}
+/ 
+/   = fields_for :person, person do |sf|
+/     %fieldset.crop
+/       = sf.hidden_field :image_offset_left, :value => scale_l, :class => 'ol'
+/       = sf.hidden_field :image_offset_top, :value => scale_t, :class => 'ot'
+/       = sf.hidden_field :image_upload_id, :value => upload.id
+/       .scaler
+/         %p.range
+/           = image_tag('scale_small.png', :class => 'range_marker')
+/           = sf.range_field :image_scale_width, :min => 853, :max => max_w, :value => scale_w, :class => 'sw'
+/           = sf.hidden_field :image_scale_height, :value => scale_h, :class => 'sh'
+/           = image_tag('scale_large.png', :class => 'range_marker')    

@@ -16,12 +16,9 @@ jQuery ($) ->
       csrf_token = dropbox.parents("form").find('input[name="authenticity_token"]').val()
       filefield_selector = options.filefield ? 'input.file_upload'
       filefield = dropbox.find(filefield_selector)
-      
-      console.log "uploader filefield", filefield
-      
       url = options.url ? dropbox.attr("data-upload-path") ? dropbox.attr("rel")    
       paramname = options.paramname ? "upload[file]"
-      
+    
       finisher = (i, file, response, time) ->
         dropbox.find(".progress_holder").remove()
         dropbox.find(".waiter").remove()
@@ -114,6 +111,7 @@ jQuery ($) ->
     @click (e) ->
       e.preventDefault()
       e.stopPropagation()
+      filefield ?= $("input.file_upload")
       filefield.trigger('click')
     @
 
@@ -135,7 +133,6 @@ jQuery ($) ->
       @container.find("div.preview").remove()
       @container.find("div.img").after(@preview)
       @container.find("div.waiter").hide()
-      @container.append @preview
       @container.append @fields
       @container.before @overflow
 

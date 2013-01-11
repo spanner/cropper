@@ -133,6 +133,7 @@ jQuery ($) ->
       @container.find("div.preview").remove()
       @container.find("div.img").after(@preview)
       @container.find("div.waiter").hide()
+      @container.append @preview
       @container.append @fields
       @container.before @overflow
 

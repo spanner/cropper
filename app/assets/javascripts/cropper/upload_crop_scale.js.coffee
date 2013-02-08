@@ -6,7 +6,7 @@ jQuery ($) ->
       # removes the current image
       $(@).siblings('a.recrop').remove()
       # removes the form field giving upload id, so that we can make a new one
-      $(@).parents('div.dropbox').siblings('input[type="hidden"]').remove()
+      $(@).parents('div.uploadbox').siblings('input[type="hidden"]').remove()
       $(@).remove()
 
   $.fn.uploader = (opts) ->
@@ -16,12 +16,13 @@ jQuery ($) ->
       csrf_token = dropbox.parents("form").find('input[name="authenticity_token"]').val()
       filefield_selector = options.filefield ? 'input.file_upload'
       filefield = dropbox.find(filefield_selector)
-      url = options.url ? dropbox.attr("data-upload-path") ? dropbox.attr("rel")    
+      url = options.url ? dropbox.attr("data-url") ? dropbox.attr("rel")
       paramname = options.paramname ? "upload[file]"
     
       finisher = (i, file, response, time) ->
         dropbox.find(".progress_holder").remove()
         dropbox.find(".waiter").remove()
+        filefield.prop('disabled', true)
         new Cropper(response, dropbox)
 
       dropbox.filedrop
@@ -284,7 +285,7 @@ jQuery ($) ->
       @min = parseInt(@input.attr("min"), 10)
       @slider = $("<span class=\"slider\"><span class=\"scale\"><span class=\"marker\"></span></span></span>")
       @scale = @slider.find(".scale")
-      @scale_width = 240
+      @scale_width = 150
       @marker = @slider.find(".marker")
       @lastX = 0
 

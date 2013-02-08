@@ -75,6 +75,7 @@ module Cropper
       #
       belongs_to :"#{attachment_name}_upload", :class_name => "Cropper::Upload"
       before_save :"read_#{attachment_name}_upload"
+      accepts_nested_attributes_for :"#{attachment_name}_upload"
 
       ### Attachment
       #
@@ -98,10 +99,14 @@ module Cropper
         end
       end
 
-      # *reprocess_[name]?* returns true if there have been any changes to the upload association that would necessitate a new crop.
+      # *reprocess_[name]?* returns true if there have been any changes to the upload association that would require a new crop.
       #
       cols = [:upload_id]
-      cols += [:upload_id, :scale_width, :offset_top, :offset_left] if options[:cropped]
+      cols += [:upload_id, :scale_width, :scale_height, :offset_top, :offset_left] if options[:cropped]
+
+      attr_accessible *cols.map {|col| :"#{attachment_name}_#{col}"}
+      attr_accessible :"#{attachment_name}_upload", :"#{attachment_name}_upload_attributes"
+
       define_method :"reprocess_#{attachment_name}?" do
         cols.any? {|col| send(:"#{attachment_name}_#{col}_changed?") }
       end
@@ -109,14 +114,11 @@ module Cropper
       # * [name]_cropped? returns true if the named attachment is cropped on assignment. It can be useful in a form partial.
       #
       define_method :"#{attachment_name}_cropped?" do
-        STDERR.puts ">>  #{attachment_name}_cropped?"
         !!class_variable_get(:"@@#{attachment_name}_cropped")
       end
 
       define_method :"#{attachment_name}_for_cropping" do
         if upload = send(:"#{attachment_name}_upload")
-          # here we introduce a convention that might not stand up
-          STDERR.puts ">>  #{attachment_name}_for_cropping"
           upload.url(:"#{attachment_name}")
         end
       end

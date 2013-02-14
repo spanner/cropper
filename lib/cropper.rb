@@ -31,9 +31,9 @@ module Cropper
     #     has_upload :icon, :size => '40x40#', :crop => false
     #
     def has_upload(attachment_name=:image, options={})
-      unless !table_exists? || column_names.include?("#{attachment_name}_upload_id")
-        raise RuntimeError, "has_upload(#{attachment_name}) called on class #{self.to_s} but we have no #{attachment_name}_upload_id column"
-      end
+      # unless !table_exists? || column_names.include?("#{attachment_name}_upload_id")
+      #   raise RuntimeError, "has_upload(#{attachment_name}) called on class #{self.to_s} but we have no #{attachment_name}_upload_id column" unless 
+      # end
 
       options.reverse_merge!(:geometry => "640x960#", :cropped => true, :whiny => true)
       options[:geometry].sub!(/\D*$/, '') if options[:cropped]

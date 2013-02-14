@@ -285,14 +285,13 @@ jQuery ($) ->
       @min = parseInt(@input.attr("min"), 10)
       @slider = $("<span class=\"slider\"><span class=\"scale\"><span class=\"marker\"></span></span></span>")
       @scale = @slider.find(".scale")
-      @scale_width = @scale.width()
-      console.log "scale_width", @scale_width
       @marker = @slider.find(".marker")
       @lastX = 0
 
-      @reposition()
       @marker.bind("mousedown", @drag)
       @input.before(@slider).hide()
+      @scale_width = @scale.width()
+      @reposition()
 
     drag: (e) =>
       e.preventDefault()
@@ -303,12 +302,12 @@ jQuery ($) ->
 
     move: (e) =>
       deltaX = e.pageX - @lastX
-      @.pos = @pos + e.pageX - @lastX
-      @.pos = 0  if @pos < 0
-      @.pos = @scale_width  if @pos > @scale_width
-      @.placeMarker(@pos)
-      @.recalculate()
-      @.lastX = e.pageX
+      @pos = @pos + deltaX
+      @pos = 0 if @pos < 0
+      @pos = @scale_width-5 if @pos > @scale_width-5
+      @placeMarker(@pos)
+      @recalculate()
+      @lastX = e.pageX
       @callbacks.move?.call @, @value
 
     drop: (e) =>
@@ -328,6 +327,7 @@ jQuery ($) ->
       origin = @min
       value_proportion = (@value - origin) / (@max - origin)
       @pos = Math.round(@scale_width * value_proportion)
+      console.log "setting pos to #{@scale_width} * #{value_proportion}:", @pos
       @placeMarker @pos
 
     placeMarker: (x) =>

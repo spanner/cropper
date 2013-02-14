@@ -27,7 +27,9 @@ module Cropper
         
         attachment_names.each do |attachment_name|
           UPLOAD_COLUMNS.each_pair do |column_name, column_type|
-            add_column(table_name, "#{attachment_name}_#{column_name}", column_type)
+            unless column_exists? table_name, "#{attachment_name}_#{column_name}"
+              add_column(table_name, "#{attachment_name}_#{column_name}", column_type)
+            end
           end
         end
       end
@@ -38,7 +40,9 @@ module Cropper
 
         attachment_names.each do |attachment_name|
           COLUMNS.each_pair do |column_name, column_type|
-            remove_column(table_name, "#{attachment_name}_#{column_name}")
+            if column_exists? table_name, "#{attachment_name}_#{column_name}"
+              remove_column(table_name, "#{attachment_name}_#{column_name}")
+            end
           end
         end
       end

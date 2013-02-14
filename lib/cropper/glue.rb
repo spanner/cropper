@@ -4,7 +4,7 @@ module Cropper
   module Glue
     def self.included base #:nodoc:
       
-      # Extend ActiveRecord::Base with cropper::ClassMethods, as defined in cropper.rb.
+      # Extend ActiveRecord::Base with Cropper::ClassMethods, as defined in cropper.rb.
       #
       base.extend ClassMethods
 

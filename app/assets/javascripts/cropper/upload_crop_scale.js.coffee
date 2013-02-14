@@ -285,7 +285,8 @@ jQuery ($) ->
       @min = parseInt(@input.attr("min"), 10)
       @slider = $("<span class=\"slider\"><span class=\"scale\"><span class=\"marker\"></span></span></span>")
       @scale = @slider.find(".scale")
-      @scale_width = 150
+      @scale_width = @scale.width()
+      console.log "scale_width", @scale_width
       @marker = @slider.find(".marker")
       @lastX = 0
 

@@ -86,7 +86,6 @@ module Cropper
       # The cropped image is created by a [custom processor](/lib/paperclip_processors/offset_thumbnail.html) very similar to 
       # Paperclip::Thumbnail, but which looks up the scale and crop parameters to calculate the imagemagick transformation.
       #
-      Rails.logger.warn ">>> #{self}.has_attached_file #{attachment_name}, #{options.inspect}"
       has_attached_file attachment_name, options
 
       ## Maintenance

@@ -73,6 +73,13 @@ module Paperclip
       trans << "-coalesce" if animated?
       trans << "-resize" << %["#{scale}"] unless scale.nil? || scale.empty?
       trans << "-crop" << %["#{crop_and_offset}"] << "+repage"
+      
+      Rails.logger.warn %{
+OffsetCrop: 
+  scale is '#{scale}'
+  crop_and_offset is '#{crop_and_offset}'
+  trans is `#{trans}`
+      }
       trans
     end
 

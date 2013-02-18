@@ -22,8 +22,7 @@ jQuery ($) ->
       finisher = (i, file, response, time) ->
         dropbox.find(".progress_holder").remove()
         dropbox.find(".waiter").remove()
-        filefield.prop('disabled', true)
-        new Cropper(response, dropbox)
+        new Cropper(response, dropbox, filefield)
 
       dropbox.filedrop
         maxfiles: 1
@@ -94,17 +93,18 @@ jQuery ($) ->
         uploadFinished: finisher
 
       dropbox.find("a.picker").picker(filefield)
+      dropbox.find("a.detach").detach_upload()
       filefield.change (e) ->
         dropbox.trigger "pick", filefield[0]
     @
     
   $.fn.recropper = ->
-    dropbox = $("div.dropbox")
+    uploadbox = $("div.uploadbox")
     @click (e) ->
       e.preventDefault()
-      dropbox.find("div.waiter").show()
+      uploadbox.find("div.waiter").show()
       $.get $(this).attr("href"), ((response) ->
-        new Cropper(response, dropbox)
+        new Cropper(response, uploadbox)
       ), "html"
     @
 
@@ -113,6 +113,7 @@ jQuery ($) ->
       e.preventDefault()
       e.stopPropagation()
       filefield ?= $("input.file_upload")
+      console.log "picker click",  filefield.get(0)
       filefield.trigger('click')
     @
 
@@ -124,9 +125,10 @@ jQuery ($) ->
 
 
   class Cropper
-    constructor: (response, container) ->
+    constructor: (response, container, filefield) ->
       @element = $(response)
       @container = container
+      @field = filefield
       @preview = @element.find("div.preview")
       @fields = @element.find("fieldset.crop")
       @overflow = $("<div class=\"overflow\">").append(@preview.find("img").clone())
@@ -137,6 +139,11 @@ jQuery ($) ->
       @container.append @preview
       @container.append @fields
       @container.before @overflow
+
+      @field?.prop('disabled', true)
+      
+      @detacher = $('<a href="#" class="detach" />').appendTo(@container)
+      @detacher.click @cancel
 
       @top = @preview.position().top
       @left = @preview.position().left
@@ -149,14 +156,15 @@ jQuery ($) ->
         move: @resize
         drop: @hideOverflow
 
-      @accepter = @container.find('a.accept')
-      @detacher = @container.find('a.detach')
       @controls.find(".cancel a").bind "click", @cancel
       @preview.bind "mousedown", @drag
 
       @recalculateLimits()
       @setOverflow()
       @setControls()
+      @container.bind "mouseenter", @show
+      @container.bind "mouseleave", @hide
+      @hide()
 
     drag: (e) =>
       e.preventDefault()
@@ -211,7 +219,7 @@ jQuery ($) ->
       $(document).unbind "mouseup", @drop
       @move e
       @hideOverflow()
-
+    
     showOverflow: =>
       @overflow.fadeTo('normal', 0.3)
 
@@ -230,14 +238,15 @@ jQuery ($) ->
       @overflow.remove()
       @scaler.remove()
       @fields.remove()
+      @detacher.remove()
       @resetControls()
       @container.find("img").fadeIn "slow"
       @container.find("p.instructions").show()
+      @field?.prop('disabled', false)
 
     complete: (e) =>
       e.preventDefault()
       @scaler.hide()
-      @accepter.hide()
       @hideOverflow()
       @preview.unbind "mousedown", @drag
       @preview.css "cursor", 'auto'
@@ -250,7 +259,6 @@ jQuery ($) ->
     resume: (e) =>
       e.preventDefault()
       @scaler.show()
-      @accepter.show()
       @detacher.show()
       @showOverflow()
       @preview.bind "mousedown", @drag
@@ -264,7 +272,6 @@ jQuery ($) ->
       @controls.find(".cancel").show()
       @controls.find("a.picker").addClass("unavailable").unbind "click"
       @controls.find(".save a").removeClass("unavailable").bind "click", @complete
-      @accepter.bind "click", @complete
       @detacher.bind "click", @cancel
 
     resetControls: =>
@@ -272,8 +279,16 @@ jQuery ($) ->
       @controls.find(".edit").show()
       @controls.find("a.picker").removeClass("unavailable").picker()
       @controls.find(".save a").addClass("unavailable").unbind("click")
-      @accepter.unbind "click", @complete
 
+    show: =>
+      @scaler?.show()
+      @controls?.show()
+      @detacher?.show()
+      
+    hide: =>
+      @scaler?.hide()
+      @controls?.hide()
+      @detacher?.hide()
 
   class Scaler
     constructor: (range, callbacks) ->
@@ -327,7 +342,6 @@ jQuery ($) ->
       origin = @min
       value_proportion = (@value - origin) / (@max - origin)
       @pos = Math.round(@scale_width * value_proportion)
-      console.log "setting pos to #{@scale_width} * #{value_proportion}:", @pos
       @placeMarker @pos
 
     placeMarker: (x) =>

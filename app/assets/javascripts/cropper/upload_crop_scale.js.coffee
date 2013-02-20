@@ -4,10 +4,10 @@ jQuery ($) ->
     @click (e) ->
       e.preventDefault() if e
       # removes the current image
-      $(@).siblings('a.recrop').remove()
-      # removes the form field giving upload id, so that we can make a new one
+      console.log "detach_upload", $(@).parents('div.uploadbox').find('input[data-clear-on-detach]')
+      # removes the nested image upload id field put in automatically by fields_for
       $(@).parents('div.uploadbox').siblings('input[type="hidden"]').remove()
-      $(@).remove()
+      $(@).parents('.existing').remove()
 
   $.fn.uploader = (opts) ->
     @each ->
@@ -164,7 +164,7 @@ jQuery ($) ->
       @setControls()
       @container.bind "mouseenter", @show
       @container.bind "mouseleave", @hide
-      @hide()
+      # @hide()
 
     drag: (e) =>
       e.preventDefault()
@@ -284,11 +284,13 @@ jQuery ($) ->
       @scaler?.show()
       @controls?.show()
       @detacher?.show()
+      @showOverflow()
       
     hide: =>
       @scaler?.hide()
       @controls?.hide()
       @detacher?.hide()
+      @hideOverflow()
 
   class Scaler
     constructor: (range, callbacks) ->

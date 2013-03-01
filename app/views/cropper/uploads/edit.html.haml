@@ -1,12 +1,6 @@
-#dialog
-  %h1
-    Upload error!
-  %p
-    %strong
-      We apologise: you are seeing this page because of a problem with the image upload scripts.
-  %p
-    Please write to Will on <a href="will@spanner.org">will@spanner.org</a> to let him know. If you can tell him what browser you are using, and what version, that will help to fix the problem quickly.
-  %p
-    If you would like to send your image file and text with the message, he will be happy to upload it for you and publish your page.
-  %p
-    Sorry!
+/ This we show when setting the crop parameters of an upload. 
+/ It is usually either summoned by a click or returned on a 
+/ redirect from uploads#create. For more direct editing you could 
+/ also nest cropper/uploads/crop in the recipient's edit form.
+.edit_upload
+  = render :partial => "cropper/uploads/crop"

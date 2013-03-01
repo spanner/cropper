@@ -1,0 +1,46 @@
+// default state of precrop upload
+
+- upload ||= @upload
+- recipient = (params[:for] || "scrap").to_sym
+
+- if recipient == :scrap
+  - object = Droom::Scrap.new
+  - w = 580
+  - h = 326
+  - multiplier = 1
+
+- elsif recipient == :person
+  - object = Droom::Person.new
+  - w = 130
+  - h = 130
+  - multiplier = 4
+
+- prefix = 'image'
+
+- max_w = upload.width(:precrop)
+- max_h = upload.height(:precrop)
+- image_w = max_w * 3 / 4
+- image_h = max_h * 3 / 4
+- image_l = (w - image_w)/2
+- image_t = (h - image_h)/2
+
+// scale_* will already be defined when editing an existing crop
+- scale_w = params[:scale_w] || image_w
+- scale_h = params[:scale_h] || image_h
+- offset_l = params[:offset_l] || image_l
+- offset_t = params[:offset_t] || image_t
+
+.cropper
+  .preview{:style => "width: #{scale_w}px; height: #{scale_h}px; top: #{offset_t}px; left: #{offset_l}px"}
+    %img{:src => upload.file.url(:precrop)}
+
+  = fields_for recipient, object do |sf|
+    %fieldset.crop
+      = hidden_field_tag :multiplier, multiplier
+      = sf.hidden_field :"#{prefix}_offset_left", :value => offset_l, :class => 'ol'
+      = sf.hidden_field :"#{prefix}_offset_top", :value => offset_t, :class => 'ot'
+      = sf.hidden_field :"#{prefix}_upload_id", :value => upload.id
+      .scaler
+        %p.range
+          = sf.range_field :"#{prefix}_scale_width", :min => w, :max => max_w, :value => scale_w, :class => 'sw'
+          = sf.hidden_field :"#{prefix}_scale_height", :value => scale_h, :class => 'sh'

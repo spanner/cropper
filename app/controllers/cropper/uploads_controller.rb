@@ -3,6 +3,11 @@ module Cropper
     respond_to :js
     before_filter :find_upload, :only => [:show, :edit, :destroy]
 
+
+    def index
+      respond_with(@uploads)
+    end
+    
     def show
       respond_with(@upload)
     end
@@ -14,25 +19,25 @@ module Cropper
 
     def create
       @upload = Upload.create(params[:upload])
-      render :partial => 'crop'
+      redirect_to :edit
     end
 
     def edit
-      render :partial => 'crop'
+      respond_with(@upload)
     end
   
     def destroy
       @upload.destroy
-      respond_with(@upload)
+      head :ok
     end
 
   private
   
     def find_upload
-      if params[:id] == 'latest' || params[:id].blank? 
-        @upload = current_user.last_upload
+      if params[:uuid]
+        @upload = Cropper::Upload.find_by_uuid(params[:uuid])
       else
-        @upload = Upload.find(params[:id])
+        @upload = Cropper::Upload.find(params[:id])
       end
     end
 

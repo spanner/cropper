@@ -1,9 +1,8 @@
-- @recipient.build_upload unless @recipient.upload
 = f.fields_for :upload do |iuf|
-  .uploadbox{:data => {:action => "upload", :url => cropper.uploads_path(:format => :js, :for => "scrap"), :scale => 2}}
+  .uploadbox{:data => {:action => "upload", :url => cropper.uploads_path(:holder_id => @holder.id, :holder_type => @holder.type, :for => @upload.destination, :format => :js)}}
     = iuf.file_field :file, :class => 'file_upload', :accept => "image"
     .prompt
-      = link_to t(:click_to_upload), cropper.new_upload_url, :class => 'picker'
+      = link_to t(:click_to_upload), '#', :class => 'picker'
       .droppable
         .note
           = t :drop_to_upload

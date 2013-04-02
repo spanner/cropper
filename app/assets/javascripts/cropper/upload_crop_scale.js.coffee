@@ -130,6 +130,7 @@ jQuery ($) ->
       @container = container
       @field = filefield
       @preview = @element.find("div.preview")
+      @report = @element.find("div.report")
       @fields = @element.find("fieldset.crop")
       @overflow = $("<div class=\"overflow\">").append(@preview.find("img").clone())
       @controls = @container.find(".controls")
@@ -137,6 +138,7 @@ jQuery ($) ->
       @container.find("div.img").after(@preview)
       @container.find("div.waiter").hide()
       @container.append @preview
+      @container.append @report
       @container.append @fields
       @container.before @overflow
 
@@ -308,9 +310,11 @@ jQuery ($) ->
       @marker.bind("mousedown", @drag)
       @input.before(@slider).hide()
       @scale_width = @scale.width()
+      console.log "scale_width", @scale_width
       @reposition()
 
     drag: (e) =>
+      console.log "scaler drag"
       e.preventDefault()
       @lastX = e.pageX
       $(document).bind "mousemove", @move
@@ -319,6 +323,7 @@ jQuery ($) ->
 
     move: (e) =>
       deltaX = e.pageX - @lastX
+      console.log "scaler move", deltaX
       @pos = @pos + deltaX
       @pos = 0 if @pos < 0
       @pos = @scale_width-5 if @pos > @scale_width-5
@@ -347,6 +352,7 @@ jQuery ($) ->
       @placeMarker @pos
 
     placeMarker: (x) =>
+      console.log "placeMarker", x
       @marker.css "left", x - 3
 
     remove: =>

@@ -30,7 +30,7 @@ module Cropper
       }
       if scale_width? && offset_left? && offset_top?
         styles[:cropped] = {
-          :geometry => target_geometry,
+          :geometry => cropped_geometry,
           :processors => [:offset_thumbnail],
           :scale => "#{scale_width}x",
           :crop_and_offset => "%dx%d%+d%+d" % [target_width, target_height, -offset_left, -offset_top]
@@ -54,8 +54,7 @@ module Cropper
     after_post_process :read_dimensions
 
     # ## Crop boundaries
-    # #
-    # #
+    #
     def precrop_geometry
       @precrop_geometry ||= holder.send(:"precrop_#{destination}_geometry")
     end
@@ -65,13 +64,17 @@ module Cropper
     end
     
     def precrop_width
-      @precrop_width ||= precrop_geometry.split('x').first.to_i
+      width(:precrop)
     end
     
     def precrop_height
-      @precrop_height ||= precrop_geometry.split('x').last.to_i
+      height(:precrop)
     end
     
+    # Cropped geometry is always to a fixed size, so we can just return parts of the definition 
+    # knowing that they match the eventual dimensions. Useful, because we need this information to
+    # build the cropping interface.
+    #
     def cropped_geometry
       @cropped_geometry ||= holder.send(:"cropped_#{destination}_geometry")
     end
@@ -81,11 +84,11 @@ module Cropper
     end
     
     def cropped_width
-      @cropped_width ||= cropped_geometry.split('x').first.to_i
+      cropped_geometry.split('x').first.to_i
     end
     
     def cropped_height
-      @cropped_height ||= cropped_geometry.split('x').last.to_i
+      cropped_geometry.split('x').last.to_i
     end
 
     # *original_geometry* returns the discovered dimensions of the uploaded file as a paperclip geometry object.
@@ -101,7 +104,6 @@ module Cropper
     # which is a ruby library that mimics the action of imagemagick's convert command.
     #
     def geometry(style_name='original')
-      # These calculations are all memoised.
       @geometry ||= {}
       begin
         @geometry[style_name] ||= if style_name.to_s == 'original'

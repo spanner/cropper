@@ -1,8 +1,11 @@
-= f.fields_for :upload do |iuf|
-  .uploadbox{:data => {:action => "upload", :url => cropper.uploads_path(:holder_id => @holder.id, :holder_type => @holder.type, :for => @upload.destination, :format => :js)}}
-    = iuf.file_field :file, :class => 'file_upload', :accept => "image"
-    .prompt
+- holder ||= @holder
+- upload ||= @upload
+
+= fields_for :upload do |iuf|
+  .uploadbox{:data => {:action => "upload", :url => cropper.uploads_path(:holder_id => holder.id, :holder_type => holder.class.to_s.underscore, :for => upload.destination, :format => :js)}}
+    %p.file
+      = iuf.file_field :file, :class => 'file_upload', :accept => "image"
+    %p.instructions
       = link_to t(:click_to_upload), '#', :class => 'picker'
-      .droppable
-        .note
-          = t :drop_to_upload
+      %span.droppable
+        = t :drop_to_upload

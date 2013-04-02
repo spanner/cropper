@@ -90,7 +90,7 @@ module Cropper
       #
       has_many :uploads, :class_name => "Cropper::Upload", :as => :holder # so what happens when we call this twice?
       before_save :"read_#{attachment_name}_upload"
-      accepts_nested_attributes_for :"#{attachment_name}_upload"
+      accepts_nested_attributes_for :uploads
 
       define_method :"#{attachment_name}_upload" do
         self.uploads.destined_for(attachment_name).first
@@ -100,6 +100,7 @@ module Cropper
         upload.destination = attachment_name
         upload.updated_at = Time.now if upload.persisted?
         self.uploads << upload
+        upload
       end
 
       # You usually want to initialize an upload with something like person.build_image_upload, so that the
@@ -107,7 +108,7 @@ module Cropper
       # upload object for what column it is intended.
       #
       define_method :"build_#{attachment_name}_upload" do
-        self.send :"#{attachment_name}_upload=", self.build_upload
+        self.send :"#{attachment_name}_upload=", self.uploads.build(:holder => self)
       end
 
       ### Attachment

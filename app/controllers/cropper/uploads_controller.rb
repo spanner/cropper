@@ -1,7 +1,7 @@
 module Cropper
   class UploadsController < ::ApplicationController
     respond_to :js
-    before_filter :get_holder, :only => [:new]
+    before_filter :get_holder, :only => [:new, :create]
     before_filter :find_upload, :only => [:show, :edit, :destroy]
     before_filter :build_upload, :only => [:new, :create]
 
@@ -43,13 +43,19 @@ module Cropper
       klass = params[:holder_type]
       if id = params[:holder_id]
         @holder = klass.classify.constantize.find(id)
+      else
+        # The difficult case is when an upload is created during the creation of a new holder
+        # this at least gives us access the necessary geometry methods.
+        @holder = klass.classify.constantize.new
       end
-      raise ActiveRecord::RecordNotFound, "Cannot find a valid holder for this upload." unless @holder
+      Rails.logger.warn ">>> upload holder: #{@holder.inspect}"
     end
     
     def build_upload
       @column = params[:for] || :image
       @upload = @holder.send :"build_#{@column}_upload"
+      # @upload.holder = @holder
+      Rails.logger.warn ">>> upload.holder: #{@upload.holder.inspect}"
     end
   
     def find_upload

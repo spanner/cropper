@@ -5,7 +5,7 @@
 module Cropper
   class Upload < ActiveRecord::Base
     belongs_to :holder, :polymorphic => true
-    attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id
+    attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder
     
     # Unlike previous versions, the main resizing and cropping step is now carried out within the upload object.
     # Usually this happens in a second step: first we upload, then we update with crop parameters, but it is

@@ -6,11 +6,13 @@ require "paperclip_processors/offset_thumbnail"
 require "cropper/engine"
 require "cropper/routing"
 require 'cropper/glue'
+require 'open-uri'
 
 module Cropper
   # module configuration is handled in a simple way by accessors on the Cropper module. At the moment
-  # there aren't many. Any, in fact, but we do hold a list of uploadable classes for whitelising in 
+  # there aren't many. Any, in fact, but we do hold a list of uploadable classes for whitelisting in 
   # the controller.
+  #
   mattr_accessor :uploadable_classes
 
   def uploadable_classes
@@ -69,13 +71,16 @@ module Cropper
       # [uploads](/app/models/upload.html) are the raw image files uploaded by this person. 
       # They are held separately as the basis for repeatable (and at some point reusable) image assignment.
       #
-      has_many :"#{attachment_name}_uploads", :class_name => "Cropper::Upload", :as => :holder
+      has_one :"#{attachment_name}_upload", :class_name => "Cropper::Upload", :as => :holder
       before_save :"read_#{attachment_name}_upload"
       accepts_nested_attributes_for :"#{attachment_name}_upload"
 
-      # Usually we want the most recent upload.
-      define_method :"#{attachment_name}_upload" do
-        self.send(:"#{attachment_name}_uploads").order('created_at DESC').first
+      # You usually want to initialize an upload with something like person.build_image_upload, so that the
+      # mutual connection is properly established. It is a weakness of the system that we have to tell the
+      # upload object for what column it is intended.
+      #
+      define_method :"build_#{attachment_name}_upload" do
+        self.uploads.build(:destination => attachment_name, :cropped_geometry => cropped_geometry, :precrop_geometry => precrop_geometry)
       end
 
       ### Attachment
@@ -84,18 +89,6 @@ module Cropper
       # If this class then generates other styles, they are built from that cropped image rather than the file originally uploaded.
       #
       has_attached_file attachment_name, options
-
-      ## Crop dimensions
-      #
-      # These closures are called from lambda'd style definitions in the upload object and return the values given here as options.
-      
-      define_method :"#{attachment_name}_crop_size" do
-        cropped_geometry
-      end
-      
-      define_method :"#{attachment_name}_precrop_size" do
-        precrop_geometry
-      end
 
       ## Maintenance
       #
@@ -106,7 +99,7 @@ module Cropper
         if self.send :"reprocess_#{attachment_name}?" && upload = self.send(:"#{attachment_name}_upload")
           # We assign the cropped style rather than the whole attachment. At the moment this doesn't work with filesystem storage
           # because the url is just a path. Something with configured hosts will be required.
-          self.send :"#{attachment_name}=", upload.url(:cropped)
+          self.send :"#{attachment_name}=", open(upload.url(:cropped))
         end
       end
 

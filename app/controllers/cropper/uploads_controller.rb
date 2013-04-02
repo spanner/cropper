@@ -33,6 +33,10 @@ module Cropper
 
   private
   
+    def get_holder
+      if params[:holder_type]
+    end
+  
     def find_upload
       if params[:uuid]
         @upload = Cropper::Upload.find_by_uuid(params[:uuid])

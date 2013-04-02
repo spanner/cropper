@@ -4,20 +4,32 @@
 #
 module Cropper
   class Upload < ActiveRecord::Base
-    attr_accessible :file
-
-    @@precrop_styles = {
-      :thumb => { :geometry => "100x100#" },
-      :precrop => { :geometry => "1600x3000" }
-    }
-    cattr_accessor :precrop_styles
+    belongs_to :holder, :polymorphic => true
+    attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id
+    
+    
+    # Unlike previous versions, the main resizing and cropping step is now carried out within the upload object.
+    # Usually this happens in a second step: first we upload, then we update with crop parameters, but it is
+    # also possible to present the cropping in javascript and upload the file with all the necessary values.
     
     has_attached_file :file,
                       :processors => [:thumbnail],
-                      :styles => lambda { |attachment| attachment.instance.precrop_styles }
+                      :styles => lambda { |attachment| attachment.instance.paperclip_styles }
 
-    def precrop_styles
-      self.class.precrop_styles
+    def paperclip_styles
+      # precrop and crop dimensions are set in the has_upload declaration and can be retrieved from the holder.
+      if !!holder
+        # 
+      end
+    end
+    
+    def cropped_style
+      # this is a calculated crop size that would normally be applied only on update,
+      # when the crop values are available.
+    end
+    
+    def crop_changed?
+      file_changed? || 
     end
 
     validates :file, :attachment_presence => true
@@ -94,7 +106,22 @@ module Cropper
     def dimensions_known?
       original_width? && original_height?
     end
-  
+
+    # The offset_thumbnail processor needs two arguments: first the size to which the image should scale, then the 
+    # precise crop that should be taken from the scaled image.
+    #
+    # *image_scale* returns a geometry string based on the user's chosen scale width.
+    def scale
+      "#{self.scale_width}x"
+    end
+
+    # *image_crop_and_offset* returns another geometry string based on the exact cutout that should be used.
+    # The result of this operation is always a jpeg 853px by 505px, but its relation to the original uploaded file
+    # is different every time.
+    def crop_and_offset
+      "%dx%d%+d%+d" % [853, 505, -offset_left, -offset_top]
+    end
+
   private
 
     # *read_dimensions* is called after post processing to record in the database the original width, height 

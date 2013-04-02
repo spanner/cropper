@@ -1,19 +1,6 @@
 // default state of precrop upload
 
 - upload ||= @upload
-- recipient = (params[:for] || "scrap").to_sym
-
-- if recipient == :scrap
-  - object = Droom::Scrap.new
-  - w = 580
-  - h = 326
-  - multiplier = 1
-
-- elsif recipient == :person
-  - object = Droom::Person.new
-  - w = 130
-  - h = 130
-  - multiplier = 4
 
 - prefix = 'image'
 

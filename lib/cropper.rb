@@ -108,7 +108,7 @@ module Cropper
       # upload object for what column it is intended.
       #
       define_method :"build_#{attachment_name}_upload" do
-        self.send :"#{attachment_name}_upload=", self.uploads.build(:holder => self)
+        self.send :"#{attachment_name}_upload=", self.uploads.build(:destination => attachment_name, :precrop_geometry => precrop_geometry, :cropped_geometry => cropped_geometry)
       end
 
       ### Attachment

@@ -1,21 +1,22 @@
-- prefix = @upload.destination
+- upload ||= @upload
+- prefix = upload.destination
 
-- target_w = @upload.cropped_width
-- target_h = @upload.cropped_height
-- max_w = @upload.precrop_width
-- max_h = @upload.precrop_height
+- target_w = upload.cropped_width
+- target_h = upload.cropped_height
+- max_w = upload.precrop_width
+- max_h = upload.precrop_height
 
 // scale_* will already be defined when editing an existing crop
-- scale_w = @upload.scale_width || max_w * 3 / 4
-- scale_h = @upload.scale_height || max_h * 3 / 4
-- offset_l = @upload.offset_left || (target_w - scale_w)/2
-- offset_t = @upload.offset_top || (target_h - scale_h)/2
+- scale_w = upload.scale_width || max_w * 3 / 4
+- scale_h = upload.scale_height || max_h * 3 / 4
+- offset_l = upload.offset_left || (target_w - scale_w)/2
+- offset_t = upload.offset_top || (target_h - scale_h)/2
 
 .cropper
   .preview{:style => "width: #{scale_w}px; height: #{scale_h}px; top: #{offset_t}px; left: #{offset_l}px"}
-    %img{:src => @upload.file.url(:precrop)}
+    %img{:src => upload.file.url(:precrop)}
 
-  = fields_for @upload do |uf|
+  = fields_for upload do |uf|
     = uf.hidden_field :holder_id
     = uf.hidden_field :holder_type
     = uf.hidden_field :destination

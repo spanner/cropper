@@ -5,7 +5,7 @@
 module Cropper
   class Upload < ActiveRecord::Base
     belongs_to :holder, :polymorphic => true
-    attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder
+    attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder, :destination, :cropped_geometry, :precrop_geometry
     
     # Unlike previous versions, the main resizing and cropping step is now carried out within the upload object.
     # Usually this happens in a second step: first we upload, then we update with crop parameters, but it is
@@ -16,7 +16,6 @@ module Cropper
                       :styles => lambda { |attachment| attachment.instance.paperclip_styles }
 
     validates :file, :attachment_presence => true
-    validates :holder, :presence => true
     validates :destination, :presence => true
     
     scope :destined_for, lambda { |col|
@@ -54,31 +53,39 @@ module Cropper
     #
     after_post_process :read_dimensions
 
-    ## Crop boundaries
-    #
-    #
+    # ## Crop boundaries
+    # #
+    # #
     def precrop_geometry
       @precrop_geometry ||= holder.send(:"precrop_#{destination}_geometry")
     end
-
+    
+    def precrop_geometry=(geom)
+      @precrop_geometry = geom
+    end
+    
     def precrop_width
-      @precrop_width ||= precrop_geometry.split('x').first
+      @precrop_width ||= precrop_geometry.split('x').first.to_i
     end
-
+    
     def precrop_height
-      @precrop_height ||= precrop_geometry.split('x').last
+      @precrop_height ||= precrop_geometry.split('x').last.to_i
     end
-
+    
     def cropped_geometry
       @cropped_geometry ||= holder.send(:"cropped_#{destination}_geometry")
     end
-
-    def cropped_width
-      @cropped_width ||= cropped_geometry.split('x').first
+    
+    def cropped_geometry=(geom)
+      @cropped_geometry = geom
     end
-
+    
+    def cropped_width
+      @cropped_width ||= cropped_geometry.split('x').first.to_i
+    end
+    
     def cropped_height
-      @cropped_height ||= cropped_geometry.split('x').last
+      @cropped_height ||= cropped_geometry.split('x').last.to_i
     end
 
     # *original_geometry* returns the discovered dimensions of the uploaded file as a paperclip geometry object.
@@ -165,9 +172,12 @@ module Cropper
         Rails.logger.warn "+++ getting geometry from queued file #{file.inspect}."
         Rails.logger.warn "--- File exist? #{File.exist?(file).inspect}"
         geometry = Paperclip::Geometry.from_file(file)
+        Rails.logger.warn "=== Geometry: #{geometry.inspect}"
         self.original_width = geometry.width
         self.original_height = geometry.height
         self.original_extension = File.extname(file.path)
+        Rails.logger.warn "??? validity: #{self.valid?.inspect}. errors: #{self.errors.inspect}"
+        
       end
       true
     end

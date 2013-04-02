@@ -14,21 +14,28 @@ module Cropper
     end
 
     def new
-      respond_with @upload
+      respond_with @upload do |format|
+        format.js { render :partial => 'pick' }
+      end
     end
 
     def create
       @upload.update_attributes(params[:upload])
-      redirect_to :edit
+      # if the holder is new, this isn't populated
+      @upload.holder ||= @holder
+      respond_with(@upload) do |format|
+        format.js { render :partial => 'crop' }
+      end
     end
 
     def edit
-      respond_with(@upload)
+      respond_with(@upload) do |format|
+        format.js { render :partial => 'crop' }
+      end
     end
 
     def update
       @upload.update_attributes(params[:upload])
-      @holder.save
       redirect_to @holder
     end
 
@@ -54,7 +61,6 @@ module Cropper
     def build_upload
       @column = params[:for] || :image
       @upload = @holder.send :"build_#{@column}_upload"
-      # @upload.holder = @holder
       Rails.logger.warn ">>> upload.holder: #{@upload.holder.inspect}"
     end
   

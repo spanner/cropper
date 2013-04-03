@@ -92,8 +92,8 @@ jQuery ($) ->
 
         uploadFinished: finisher
 
-      dropbox.find("a.picker").picker(filefield)
-      dropbox.find("a.detach").detach_upload()
+      dropbox.find('a[data-action="pick"]').picker(filefield)
+      dropbox.find('a[data-action="detach"]').detach_upload()
       filefield.change (e) ->
         dropbox.trigger "pick", filefield[0]
     @
@@ -137,7 +137,6 @@ jQuery ($) ->
       @container.find("div.preview").remove()
       @container.find("div.img").after(@preview)
       @container.find("div.waiter").hide()
-      @container.prepend @preview
       @container.append @instructions
       @container.append @fields
       @container.before @overflow
@@ -269,14 +268,14 @@ jQuery ($) ->
       @controls.show()
       @controls.find(".edit").hide()
       @controls.find(".cancel").show()
-      @controls.find("a.picker").addClass("unavailable").unbind "click"
+      @controls.find('a[data-action="pick"]').addClass("unavailable").unbind "click"
       @controls.find(".save a").removeClass("unavailable").bind "click", @complete
       @detacher.bind "click", @cancel
 
     resetControls: =>
       @controls.find(".cancel").hide()
       @controls.find(".edit").show()
-      @controls.find("a.picker").removeClass("unavailable").picker()
+      @controls.find('a[data-action="pick"]').removeClass("unavailable").picker()
       @controls.find(".save a").addClass("unavailable").unbind("click")
 
     show: =>

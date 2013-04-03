@@ -2,6 +2,8 @@
 # We assume that even when the final destination is an S3 bucket, the initial upload
 # will be held locally.
 #
+require 'open-uri'
+
 module Cropper
   class Upload < ActiveRecord::Base
     belongs_to :holder, :polymorphic => true
@@ -183,15 +185,19 @@ module Cropper
         self.original_height = geometry.height
         self.original_extension = File.extname(file.path)
         Rails.logger.warn "??? validity: #{self.valid?.inspect}. errors: #{self.errors.inspect}"
-        
       end
       true
     end
     
     def update_holder
       if holder
-        holder.send :"#{holder_column}=", file_url(:cropped)
-        holder.save
+        if source = file.url(:cropped, false)
+          source = (Rails.root + "public/#{source}") unless source =~ /^http/
+          Rails.logger.warn "--- update_holder: #{source}"
+          Rails.logger.warn "--- File exist? #{File.exist?(source).inspect}"
+          holder.send :"#{holder_column}=", open(source)
+          holder.save
+        end
       end
     end
 

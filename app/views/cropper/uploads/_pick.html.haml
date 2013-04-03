@@ -4,17 +4,21 @@
 
 = fields_for :upload do |iuf|
   .uploadbox{:data => {:action => "upload", :url => cropper.uploads_path(:holder_id => holder.id, :holder_type => holder.class.to_s.underscore, :holder_column => upload.holder_column, :format => :js)}}
+
     .img
       - if upload.file?
-        = link_to image_tag(upload.file.url(:cropped)), '#', :data => {:action => "recrop"}
+        = link_to image_tag(upload.file.url(:cropped)), cropper.edit_upload_url(upload), :data => {:action => "recrop"}
       - else
         = link_to image_tag('nopicture_cropped.png'), '#', :data => {:action => "pick"}, :alt => t(:click_to_upload)
+
     %p.file
       = iuf.file_field :file, :class => 'file_upload', :accept => "image"
+
     %p.instructions
-      = link_to t(:click_to_upload), '#', :data => {:action => "pick"}
-      %span.droppable
-        = t :drop_to_upload
+      - unless upload.file?
+        = link_to t(:click_to_upload), '#', :data => {:action => "pick"}
+        %span.droppable
+          = t :drop_to_upload
 
     - if extra_controls
       .controls

@@ -14,15 +14,14 @@ jQuery ($) ->
       options = $.extend {}, opts
       dropbox = $(@)
       csrf_token = dropbox.parents("form").find('input[name="authenticity_token"]').val()
-      filefield_selector = options.filefield ? 'input.file_upload'
-      filefield = dropbox.find(filefield_selector)
+      filefield = dropbox.find('input[type="file"]')
       url = options.url ? dropbox.attr("data-url") ? dropbox.attr("rel")
       paramname = options.paramname ? "upload[file]"
     
       finisher = (i, file, response, time) ->
         dropbox.find(".progress_holder").remove()
         dropbox.find(".waiter").remove()
-        new Cropper(response, dropbox, filefield)
+        new Cropper(response, dropbox)
 
       dropbox.filedrop
         maxfiles: 1
@@ -112,8 +111,7 @@ jQuery ($) ->
     @click (e) ->
       e.preventDefault()
       e.stopPropagation()
-      filefield ?= $("input.file_upload")
-      console.log "picker click",  filefield.get(0)
+      filefield ?= $(".uploadbox").find('input[type="file"]')
       filefield.trigger('click')
     @
 
@@ -125,13 +123,13 @@ jQuery ($) ->
 
 
   class Cropper
-    constructor: (response, container, filefield) ->
+    constructor: (response, container) ->
       @element = $(response)
-      @container = container
-      @field = filefield
+      @container = $(container)
+      @filefield = @container.find('input[type="file"]')
+      @fields = @element.find("fieldset.crop")
       @preview = @element.find("div.preview")
       @instructions = @element.find("p.drag_instructions")
-      @fields = @element.find("fieldset.crop")
       @overflow = $("<div class=\"overflow\">").append(@preview.find("img").clone())
       @controls = @container.find(".controls")
       @container.find("div.preview").remove()
@@ -141,7 +139,7 @@ jQuery ($) ->
       @container.append @fields
       @container.before @overflow
 
-      @field?.prop('disabled', true)
+      @filefield?.prop('disabled', true)
       
       @detacher = $('<a href="#" class="detach" />').appendTo(@container)
       @detacher.click @cancel
@@ -240,19 +238,7 @@ jQuery ($) ->
       @resetControls()
       @container.find("img").fadeIn "slow"
       @container.find("p.instructions").show()
-      @field?.prop('disabled', false)
-
-    complete: (e) =>
-      e.preventDefault()
-      @scaler.hide()
-      @hideOverflow()
-      @preview.unbind "mousedown", @drag
-      @preview.css "cursor", 'auto'
-      @container.find(".range_marker").hide()
-      @resetControls()
-      @controls.find(".recrop").removeClass('unavailable').unbind('click').bind "click", @resume
-      @preview.wrap($('<a href="#" class="recrop" />'))
-      @preview.parent().bind "click", @resume
+      @filefield?.prop('disabled', false)
       
     resume: (e) =>
       e.preventDefault()
@@ -268,15 +254,18 @@ jQuery ($) ->
       @controls.show()
       @controls.find(".edit").hide()
       @controls.find(".cancel").show()
-      @controls.find('a[data-action="pick"]').addClass("unavailable").unbind "click"
-      @controls.find(".save a").removeClass("unavailable").bind "click", @complete
+      @controls.find('a[data-action="pick"]').addClass("unavailable").unbind("click").bind("click", @blocker)
       @detacher.bind "click", @cancel
 
     resetControls: =>
       @controls.find(".cancel").hide()
       @controls.find(".edit").show()
       @controls.find('a[data-action="pick"]').removeClass("unavailable").picker()
-      @controls.find(".save a").addClass("unavailable").unbind("click")
+
+    blocker: (e) =>
+      if e
+        e.preventDefault()
+        e.stopPropagation()
 
     show: =>
       @showClutter()
@@ -333,7 +322,6 @@ jQuery ($) ->
 
     move: (e) =>
       deltaX = e.pageX - @lastX
-      console.log "scaler move", deltaX
       @pos = @pos + deltaX
       @pos = 0 if @pos < 0
       @pos = @scale_width-5 if @pos > @scale_width-5

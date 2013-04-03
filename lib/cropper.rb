@@ -24,25 +24,25 @@ module Cropper
     end
 
     def declare_uploadable(klass, column, options)
-      k = klass.to_s.underscore
+      k = klass.to_s.underscore.to_sym
       uploadable_classes[k] ||= []
-      uploadable_classes[k].push(column)
+      uploadable_classes[k].push(column.to_sym)
       upload_options[k] ||= {}
-      upload_options[k][column] = {
+      upload_options[k][column.to_sym] = {
         :precrop_geometry => options.delete(:precrop),
         :crop_geometry => options.delete(:crop)
       }
     end
     
     def crop_geometry(klass, column)
-      k = klass.to_s.underscore
-      upload_options[k][column][:crop_geometry]
+      k = klass.to_s.underscore.to_sym
+      upload_options[k][column.to_sym][:crop_geometry]
     end
 
     def precrop_geometry(klass, column)
-      k = klass.to_s.underscore
+      k = klass.to_s.underscore.to_sym
       Rails.logger.warn "precrop_geometry(#{k.inspect}, #{column.inspect})"
-      upload_options[k][column][:precrop_geometry]
+      upload_options[k][column.to_sym][:precrop_geometry]
     end
   end
   
@@ -99,6 +99,7 @@ module Cropper
       # Ok, I give in. We have to require an image_upload_id column. It's silly trying to mimic the whole association machine.
       belongs_to :"#{attachment_name}_upload", :class_name => "Cropper::Upload"
       accepts_nested_attributes_for :"#{attachment_name}_upload"
+      attr_accessible :"#{attachment_name}_upload_attributes"
       before_save :"read_#{attachment_name}_upload"
 
       #...but we still need to intervene to set the destination column of the upload when it is assigned
@@ -130,10 +131,14 @@ module Cropper
       # it will assign the uploaded file.
       #
       define_method :"read_#{attachment_name}_upload" do
-        if self.send :"reprocess_#{attachment_name}?" && upload = self.send(:"#{attachment_name}_upload")
-          # We assign the cropped style rather than the whole attachment. At the moment this doesn't work with filesystem storage
-          # because the url is just a path. Something with configured hosts will be required.
-          self.send :"#{attachment_name}=", open(upload.url(:cropped))
+        if self.send :"reprocess_#{attachment_name}?" 
+          if upload = self.send(:"#{attachment_name}_upload")
+            # We assign the cropped style rather than the whole attachment. At the moment this doesn't work with filesystem storage
+            # because the url is just a path. Something with configured hosts will be required.
+            url_temp = "http://yearbook.dev" + upload.url(:cropped)
+            Rails.logger.warn "<<< opening URL to get cropped image: #{url_temp}"
+            self.send :"#{attachment_name}=", open(url_temp)
+          end
         end
       end
 

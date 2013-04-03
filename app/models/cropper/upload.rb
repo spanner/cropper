@@ -6,7 +6,7 @@ module Cropper
   class Upload < ActiveRecord::Base
     belongs_to :holder, :polymorphic => true
     attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder, :destination
-    
+    attr_accessor :reprocessed
     # Unlike previous versions, the main resizing and cropping step is now carried out within the upload object.
     # Usually this happens in a second step: first we upload, then we update with crop parameters, but it is
     # also possible to present the cropping in javascript and upload the file with all the necessary values.
@@ -18,38 +18,48 @@ module Cropper
     validates :file, :attachment_presence => true
     validates :destination, :presence => true
     
+    after_save :reprocess_if_crop_changed
+    
     scope :destined_for, lambda { |col|
       where(:destination => col).order('updated_at DESC, created_at DESC')
     }
 
     def paperclip_styles
-      styles = {}
-      styles[:precrop] = {
-        :geometry => precrop_geometry,
-        :processors => [:thumbnail]
-      }
-      if scale_width? && offset_left? && offset_top?
-        styles[:cropped] = {
-          :geometry => cropped_geometry,
-          :processors => [:offset_thumbnail],
-          :scale => "#{scale_width}x",
-          :crop_and_offset => "%dx%d%+d%+d" % [target_width, target_height, -offset_left, -offset_top]
+      unless @styles
+        @styles = {}
+        @styles[:precrop] = {
+          :geometry => precrop_geometry,
+          :processors => [:thumbnail]
         }
+        if scale_width? && offset_left? && offset_top?
+          @styles[:cropped] = {
+            :geometry => crop_geometry,
+            :processors => [:offset_thumbnail],
+            :scale => "#{scale_width}x",
+            :crop_and_offset => "%dx%d%+d%+d" % [crop_width, crop_height, -offset_left, -offset_top]
+          }
+        end
       end
-      styles
+      @styles
     end
 
     # crop_changed? returns true if any property has changed that should cause a recrop. That includes the file attachment itself.
-    #todo: think this through: where does the recrop happen?
-
+    #
     def crop_changed?
-      !![:file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id].detect { |col| self.send :"#{col}_changed?" }
+      !self.reprocessed && !![:scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :destination].detect { |col| self.send :"#{col}_changed?" }
+    end
+    
+    def reprocess_if_crop_changed
+      if crop_changed?
+        file.reprocess!(:cropped) 
+        self.reprocessed = true
+      end
     end
 
     ## Image dimensions
     #
-    # We need to know dimensions of the precrop image in order to set up the cropping interface, so we
-    # examine the uploaded file before it is flushed.
+    # We need to know dimensions of the precrop image in order to set up the cropping interface,
+    # so we examine the uploaded file before it is flushed.
     #
     after_post_process :read_dimensions
 
@@ -62,31 +72,27 @@ module Cropper
     end
 
     def precrop_width
-      width(:precrop)
+      @precrop_width ||= width(:precrop)
     end
     
     def precrop_height
-      height(:precrop)
+      @precrop_height ||= height(:precrop)
     end
     
     # Cropped geometry is always to a fixed size, so we can just return parts of the definition 
     # knowing that they match the eventual dimensions. Useful, because we need this information to
     # build the cropping interface.
     #
-    def cropped_geometry
-      @precrop_geometry ||= Cropper.crop_geometry(holder_type, destination)
+    def crop_geometry
+      @crop_geometry ||= Cropper.crop_geometry(holder_type, destination)
+    end
+        
+    def crop_width
+      @cropped_width ||= crop_geometry.split('x').first.to_i
     end
     
-    def cropped_geometry=(geom)
-      @cropped_geometry = geom
-    end
-    
-    def cropped_width
-      cropped_geometry.split('x').first.to_i
-    end
-    
-    def cropped_height
-      cropped_geometry.split('x').last.to_i
+    def crop_height
+      @cropped_height ||= crop_geometry.split('x').last.to_i
     end
 
     # *original_geometry* returns the discovered dimensions of the uploaded file as a paperclip geometry object.

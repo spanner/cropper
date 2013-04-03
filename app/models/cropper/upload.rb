@@ -5,7 +5,7 @@
 module Cropper
   class Upload < ActiveRecord::Base
     belongs_to :holder, :polymorphic => true
-    attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder, :destination, :cropped_geometry, :precrop_geometry
+    attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder, :destination
     
     # Unlike previous versions, the main resizing and cropping step is now carried out within the upload object.
     # Usually this happens in a second step: first we upload, then we update with crop parameters, but it is
@@ -55,14 +55,12 @@ module Cropper
 
     # ## Crop boundaries
     #
+    # Precrop geometry is unpredictable and has to be calculated.
+    #
     def precrop_geometry
-      @precrop_geometry ||= holder.send(:"precrop_#{destination}_geometry")
+      @precrop_geometry ||= Cropper.precrop_geometry(holder_type, destination)
     end
-    
-    def precrop_geometry=(geom)
-      @precrop_geometry = geom
-    end
-    
+
     def precrop_width
       width(:precrop)
     end
@@ -76,7 +74,7 @@ module Cropper
     # build the cropping interface.
     #
     def cropped_geometry
-      @cropped_geometry ||= holder.send(:"cropped_#{destination}_geometry")
+      @precrop_geometry ||= Cropper.crop_geometry(holder_type, destination)
     end
     
     def cropped_geometry=(geom)

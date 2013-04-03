@@ -3,6 +3,9 @@
 
 = fields_for :upload do |iuf|
   .uploadbox{:data => {:action => "upload", :url => cropper.uploads_path(:holder_id => holder.id, :holder_type => holder.class.to_s.underscore, :for => upload.destination, :format => :js)}}
+    - if upload.file?
+      .img
+        = link_to image_tag upload.file.url(:cropped), :data => {:action => "recrop"}
     %p.file
       = iuf.file_field :file, :class => 'file_upload', :accept => "image"
     %p.instructions

@@ -352,8 +352,7 @@ jQuery ($) ->
       @placeMarker @pos
 
     placeMarker: (x) =>
-      console.log "placeMarker", x
-      @marker.css "left", x - 3
+      @marker.css "left", x
 
     remove: =>
       @slider.remove()

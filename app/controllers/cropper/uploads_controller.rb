@@ -55,13 +55,12 @@ module Cropper
         # this at least gives us access the necessary geometry methods.
         @holder = klass.classify.constantize.new
       end
-      Rails.logger.warn ">>> upload holder: #{@holder.inspect}"
     end
     
     def build_upload
       @column = params[:for] || :image
-      @upload = @holder.send :"build_#{@column}_upload"
-      Rails.logger.warn ">>> upload.holder: #{@upload.holder.inspect}"
+      @upload = @holder.send(:"build_#{@column}_upload")
+      @holder.send(:"#{@column}_upload=", @upload)
     end
   
     def find_upload

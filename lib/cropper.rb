@@ -9,21 +9,40 @@ require 'cropper/glue'
 require 'open-uri'
 
 module Cropper
-  # module configuration is handled in a simple way by accessors on the Cropper module. At the moment
-  # there aren't many. Any, in fact, but we do hold a list of uploadable classes for whitelisting in 
-  # the controller.
+  # Module configuration is handled in a simple way by accessors on the Cropper module. At the moment
+  # there aren't many. Any, in fact, but we do hold some structural information about the uploading classes.
   #
-  mattr_accessor :uploadable_classes
+  mattr_accessor :uploadable_classes, :upload_options
 
   class << self
     def uploadable_classes
       @@uploadable_classes ||= {}
     end
+    
+    def upload_options
+      @@upload_options ||= {}
+    end
 
-    def declare_uploadable(klass, column)
+    def declare_uploadable(klass, column, options)
       k = klass.to_s.underscore
       uploadable_classes[k] ||= []
       uploadable_classes[k].push(column)
+      upload_options[k] ||= {}
+      upload_options[k][column] = {
+        :precrop_geometry => options.delete(:precrop),
+        :crop_geometry => options.delete(:crop)
+      }
+    end
+    
+    def crop_geometry(klass, column)
+      k = klass.to_s.underscore
+      upload_options[k][column][:crop_geometry]
+    end
+
+    def precrop_geometry(klass, column)
+      k = klass.to_s.underscore
+      Rails.logger.warn "precrop_geometry(#{k.inspect}, #{column.inspect})"
+      upload_options[k][column][:precrop_geometry]
     end
   end
   
@@ -68,52 +87,39 @@ module Cropper
       # end
       
       # allow uploads to be assigned to this class and column in the UploadsController.
-      Cropper.declare_uploadable(self, attachment_name)
-
       options.reverse_merge!(:crop => "960x640#", :precrop => "1600x1600<", :whiny => true)
-      precrop_geometry = options.delete(:precrop)
-      cropped_geometry = options.delete(:crop)
-
-      # These two closures are called later by the upload object to discover its scaling dimensions.
-
-      define_method :"precrop_#{attachment_name}_geometry" do
-        precrop_geometry
-      end
-
-      define_method :"cropped_#{attachment_name}_geometry" do
-        cropped_geometry
-      end
+      Cropper.declare_uploadable(self, attachment_name, options)
 
       ### Upload association
       #
       # [uploads](/app/models/upload.html) are the original image files uploaded and cropped by this person.
       #
       has_many :uploads, :class_name => "Cropper::Upload", :as => :holder # so what happens when we call this twice?
+      
+      # Ok, I give in. We have to require an image_upload_id column. It's silly trying to mimic the whole association machine.
+      belongs_to :"#{attachment_name}_upload", :class_name => "Cropper::Upload"
+      accepts_nested_attributes_for :"#{attachment_name}_upload"
       before_save :"read_#{attachment_name}_upload"
-      accepts_nested_attributes_for :uploads
 
-      define_method :"#{attachment_name}_upload" do
-        self.uploads.destined_for(attachment_name).first
-      end
-
-      define_method :"#{attachment_name}_upload=" do |upload|
+      #...but we still need to intervene to set the destination column of the upload when it is assigned
+      define_method :"#{attachment_name}_upload_with_destination=" do |upload|
         upload.destination = attachment_name
-        upload.updated_at = Time.now if upload.persisted?
-        self.uploads << upload
-        upload
+        send :"#{attachment_name}_upload_without_destination=", upload
       end
+      alias_method_chain :"#{attachment_name}_upload=", :destination
 
-      # You usually want to initialize an upload with something like person.build_image_upload, so that the
-      # mutual connection is properly established. It is a weakness of the cropper that we have to tell the
-      # upload object for what column it is intended.
-      #
-      define_method :"build_#{attachment_name}_upload" do
-        self.send :"#{attachment_name}_upload=", self.uploads.build(:destination => attachment_name, :precrop_geometry => precrop_geometry, :cropped_geometry => cropped_geometry)
+      #...or built.
+      define_method :"build_#{attachment_name}_upload_with_destination" do |attributes={}, options={}|
+        attributes[:destination] = attachment_name
+        attributes[:holder_type] ||= self.class.to_s unless attributes[:holder]
+        send :"build_#{attachment_name}_upload_without_destination", attributes, options
       end
+      alias_method_chain :"build_#{attachment_name}_upload", :destination
 
       ### Attachment
       #
-      # Image attachments work in the usual Paperclip way except that they are always received from an upload object, usually in an already-cropped form.
+      # Eventually we get to the point. Image attachments work in the usual Paperclip way except that they are always received from
+      # an upload object, presumably in an already-cropped form.
       # If this class then generates other styles, they are built from that cropped image rather than the file originally uploaded.
       #
       has_attached_file attachment_name, options
@@ -135,7 +141,7 @@ module Cropper
       #
       define_method :"reprocess_#{attachment_name}?" do
         #todo: we're missing the part where we check for a new upload. need to mimic the _changed? functionality somehow.
-        self.send(:"#{attachment_name}_upload").crop_changed?
+        self.send(:"#{attachment_name}_upload_id_changed?") || self.send(:"#{attachment_name}_upload").crop_changed?
       end
 
 

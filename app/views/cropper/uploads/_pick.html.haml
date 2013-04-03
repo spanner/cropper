@@ -1,8 +1,9 @@
 - holder ||= @holder
 - upload ||= @upload
+- extra_controls ||= false
 
 = fields_for :upload do |iuf|
-  .uploadbox{:data => {:action => "upload", :url => cropper.uploads_path(:holder_id => holder.id, :holder_type => holder.class.to_s.underscore, :for => upload.holder_column, :format => :js)}}
+  .uploadbox{:data => {:action => "upload", :url => cropper.uploads_path(:holder_id => holder.id, :holder_type => holder.class.to_s.underscore, :holder_column => upload.holder_column, :format => :js)}}
     - if upload.file?
       .img
         = link_to image_tag upload.file.url(:cropped), :data => {:action => "recrop"}
@@ -12,3 +13,16 @@
       = link_to t(:click_to_upload), '#', :class => 'picker'
       %span.droppable
         = t :drop_to_upload
+
+    - if extra_controls
+      .controls
+        #uploader.upload.button
+          = link_to t(:upload), '#', :class => 'picker'
+        .edit.button
+          - if @upload
+            = link_to t(:edit_crop), cropper.edit_upload_url(@upload, :person_id => @person.id), :class => 'recrop'
+          - else
+            = link_to t(:edit_crop), '#', :class => 'recrop unavailable'
+        .cancel.button
+          = link_to t(:cancel), '#'
+    

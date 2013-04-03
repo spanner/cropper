@@ -100,7 +100,7 @@ module Cropper
       belongs_to :"#{attachment_name}_upload", :class_name => "Cropper::Upload"
       accepts_nested_attributes_for :"#{attachment_name}_upload"
       attr_accessible :"#{attachment_name}_upload_attributes"
-      after_save :reconnect_to_upload
+      after_save :"connect_to_#{attachment_name}_upload"
       
       #...but we still need to intervene to set the holder_column column of the upload when it is assigned
       define_method :"#{attachment_name}_upload_with_holder_column=" do |upload|
@@ -120,10 +120,14 @@ module Cropper
       # when a new holder is created, the interface means that the upload will have preceded it. In that
       # case we force the setting of holder_type to allow crop-dimension lookups. Here we make sure that 
       # holder_id is also present.
-      def reconnect_to_upload
+      define_method :"connect_to_#{attachment_name}_upload" do
         if upload = send(:"#{attachment_name}_upload")
-          upload.update_column(:holder_id, self)
+          upload.update_column(:holder_type, self.class.to_s)
+          upload.update_column(:holder_id, self.id)
+          upload.update_column(:holder_column, attachment_name)
         end
+        Rails.logger.warn "connect_to_#{attachment_name}_upload: upload is #{upload.inspect}. Self is #{self.inspect}"
+        true
       end
 
       ### Attachment

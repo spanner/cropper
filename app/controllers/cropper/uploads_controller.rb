@@ -58,7 +58,7 @@ module Cropper
     end
     
     def build_upload
-      @column = params[:for] || :image
+      @column = params[:holder_column] || :image
       @upload = @holder.send(:"build_#{@column}_upload")
       @holder.send(:"#{@column}_upload=", @upload)
     end

@@ -130,15 +130,15 @@ jQuery ($) ->
       @container = container
       @field = filefield
       @preview = @element.find("div.preview")
-      @report = @element.find("div.report")
+      @instructions = @element.find("p.drag_instructions")
       @fields = @element.find("fieldset.crop")
       @overflow = $("<div class=\"overflow\">").append(@preview.find("img").clone())
       @controls = @container.find(".controls")
       @container.find("div.preview").remove()
       @container.find("div.img").after(@preview)
       @container.find("div.waiter").hide()
-      @container.append @preview
-      @container.append @report
+      @container.prepend @preview
+      @container.append @instructions
       @container.append @fields
       @container.before @overflow
 
@@ -164,8 +164,8 @@ jQuery ($) ->
       @recalculateLimits()
       @setOverflow()
       @setControls()
-      @container.bind "mouseenter", @show
-      @container.bind "mouseleave", @hide
+      @container.bind "mouseenter", @showClutter
+      @container.bind "mouseleave", @hideClutter
       # @hide()
 
     drag: (e) =>
@@ -174,6 +174,7 @@ jQuery ($) ->
       $(document).bind "mouseup", @drop
       @lastY = e.pageY
       @lastX = e.pageX
+      @hideClutter()
       @showOverflow()
 
     move: (e) =>
@@ -220,13 +221,8 @@ jQuery ($) ->
       $(document).unbind "mousemove", @move
       $(document).unbind "mouseup", @drop
       @move e
+      @showClutter()
       @hideOverflow()
-    
-    showOverflow: =>
-      @overflow.fadeTo('normal', 0.3)
-
-    hideOverflow: =>
-      @overflow.fadeOut('normal')
 
     setOverflow: (argument) =>
       @overflow.css
@@ -241,6 +237,7 @@ jQuery ($) ->
       @scaler.remove()
       @fields.remove()
       @detacher.remove()
+      @instructions.remove()
       @resetControls()
       @container.find("img").fadeIn "slow"
       @container.find("p.instructions").show()
@@ -283,16 +280,30 @@ jQuery ($) ->
       @controls.find(".save a").addClass("unavailable").unbind("click")
 
     show: =>
+      @showClutter()
+      @showOverflow()
+
+    showClutter: =>
       @scaler?.show()
       @controls?.show()
       @detacher?.show()
-      @showOverflow()
-      
+      @instructions?.show()
+
+    showOverflow: =>
+      @overflow.show()#fadeTo('normal', 0.3)
+
     hide: =>
+      @hideClutter()
+      @hideOverflow()
+
+    hideClutter: =>
       @scaler?.hide()
       @controls?.hide()
       @detacher?.hide()
-      @hideOverflow()
+      @instructions?.hide()
+
+    hideOverflow: =>
+      @overflow.hide()#fadeOut('normal')
 
   class Scaler
     constructor: (range, callbacks) ->

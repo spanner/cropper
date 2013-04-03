@@ -14,40 +14,9 @@
 .cropper
   .preview{:style => "width: #{scale_w}px; height: #{scale_h}px; top: #{offset_t}px; left: #{offset_l}px"}
     %img{:src => upload.file.url(:precrop)}
-
-  .report
-    target_w:
-    %span.target_w
-      = target_w
-    %br
-    target_h:
-    %span.scale_h
-      = target_h
-    %br
-    max_w:
-    %span.max_w
-      = max_w
-    %br
-    max_h:
-    %span.max_h
-      = max_h
-    %br
-    scale_w:
-    %span.scale_w
-      = scale_w
-    %br
-    scale_h:
-    %span.scale_h
-      = scale_h
-    %br
-    offset_l:
-    %span.offset_l
-      = offset_l
-    %br
-    offset_t:
-    %span.offset_t
-      = offset_t
-
+  %p.drag_instructions
+    = t :drag_instructions
+    
   = fields_for upload.holder do |hf|
     = hf.fields_for :"#{upload.holder_column}_upload", upload do |uf|
       %fieldset.crop

@@ -5,7 +5,7 @@
 module Cropper
   class Upload < ActiveRecord::Base
     belongs_to :holder, :polymorphic => true
-    attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder, :destination
+    attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder, :holder_column
     attr_accessor :reprocessed
     # Unlike previous versions, the main resizing and cropping step is now carried out within the upload object.
     # Usually this happens in a second step: first we upload, then we update with crop parameters, but it is
@@ -16,16 +16,16 @@ module Cropper
                       :styles => lambda { |attachment| attachment.instance.paperclip_styles }
 
     validates :file, :attachment_presence => true
-    validates :destination, :presence => true
+    validates :holder_column, :presence => true
     
-    after_save :reprocess_if_crop_changed
+    before_update :mark_for_reprocessing_if_crop_changed
     
     scope :destined_for, lambda { |col|
-      where(:destination => col).order('updated_at DESC, created_at DESC')
+      where(:holder_column => col).order('updated_at DESC, created_at DESC')
     }
 
     def paperclip_styles
-      unless @styles
+      if !@styles || crop_changed?
         @styles = {}
         @styles[:precrop] = {
           :geometry => precrop_geometry,
@@ -46,14 +46,13 @@ module Cropper
     # crop_changed? returns true if any property has changed that should cause a recrop. That includes the file attachment itself.
     #
     def crop_changed?
-      !self.reprocessed && !![:scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :destination].detect { |col| self.send :"#{col}_changed?" }
+      changed = !self.reprocessed && !![:scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder_column].detect { |col| self.send :"#{col}_changed?" }
+      Rails.logger.warn "--- crop_changed? #{changed.inspect}"
+      changed
     end
     
-    def reprocess_if_crop_changed
-      if crop_changed?
-        file.reprocess!(:cropped) 
-        self.reprocessed = true
-      end
+    def mark_for_reprocessing_if_crop_changed
+      self.file = file if crop_changed?
     end
 
     ## Image dimensions
@@ -62,13 +61,14 @@ module Cropper
     # so we examine the uploaded file before it is flushed.
     #
     after_post_process :read_dimensions
+    after_post_process :update_holder
 
     # ## Crop boundaries
     #
     # Precrop geometry is unpredictable and has to be calculated.
     #
     def precrop_geometry
-      @precrop_geometry ||= Cropper.precrop_geometry(holder_type, destination)
+      @precrop_geometry ||= Cropper.precrop_geometry(holder_type, holder_column)
     end
 
     def precrop_width
@@ -84,7 +84,7 @@ module Cropper
     # build the cropping interface.
     #
     def crop_geometry
-      @crop_geometry ||= Cropper.crop_geometry(holder_type, destination)
+      @crop_geometry ||= Cropper.crop_geometry(holder_type, holder_column)
     end
         
     def crop_width
@@ -186,6 +186,13 @@ module Cropper
         
       end
       true
+    end
+    
+    def update_holder
+      if holder
+        holder.send :"#{holder_column}=", file_url(:cropped)
+        holder.save
+      end
     end
 
   end

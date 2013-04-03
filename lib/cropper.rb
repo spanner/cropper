@@ -96,26 +96,35 @@ module Cropper
       #
       has_many :uploads, :class_name => "Cropper::Upload", :as => :holder # so what happens when we call this twice?
       
-      # Ok, I give in. We have to require an image_upload_id column. It's silly trying to mimic the whole association machine.
+      # Ok, I give in. We have to require an image_upload_id column. It's silly trying to fake the whole association machine.
       belongs_to :"#{attachment_name}_upload", :class_name => "Cropper::Upload"
       accepts_nested_attributes_for :"#{attachment_name}_upload"
       attr_accessible :"#{attachment_name}_upload_attributes"
-      before_save :"read_#{attachment_name}_upload"
-
-      #...but we still need to intervene to set the destination column of the upload when it is assigned
-      define_method :"#{attachment_name}_upload_with_destination=" do |upload|
-        upload.destination = attachment_name
-        send :"#{attachment_name}_upload_without_destination=", upload
+      after_save :reconnect_to_upload
+      
+      #...but we still need to intervene to set the holder_column column of the upload when it is assigned
+      define_method :"#{attachment_name}_upload_with_holder_column=" do |upload|
+        upload.holder_column = attachment_name
+        send :"#{attachment_name}_upload_without_holder_column=", upload
       end
-      alias_method_chain :"#{attachment_name}_upload=", :destination
+      alias_method_chain :"#{attachment_name}_upload=", :holder_column
 
       #...or built.
-      define_method :"build_#{attachment_name}_upload_with_destination" do |attributes={}, options={}|
-        attributes[:destination] = attachment_name
+      define_method :"build_#{attachment_name}_upload_with_holder_column" do |attributes={}, options={}|
+        attributes[:holder_column] = attachment_name
         attributes[:holder_type] ||= self.class.to_s unless attributes[:holder]
-        send :"build_#{attachment_name}_upload_without_destination", attributes, options
+        send :"build_#{attachment_name}_upload_without_holder_column", attributes, options
       end
-      alias_method_chain :"build_#{attachment_name}_upload", :destination
+      alias_method_chain :"build_#{attachment_name}_upload", :holder_column
+
+      # when a new holder is created, the interface means that the upload will have preceded it. In that
+      # case we force the setting of holder_type to allow crop-dimension lookups. Here we make sure that 
+      # holder_id is also present.
+      def reconnect_to_upload
+        if upload = send(:"#{attachment_name}_upload")
+          upload.update_column(:holder_id, self)
+        end
+      end
 
       ### Attachment
       #
@@ -125,31 +134,8 @@ module Cropper
       #
       has_attached_file attachment_name, options
 
-      ## Maintenance
-      #
-      # *read_[name]_upload* is called before_save. If there is a new upload, or its scale or crop values have changed, 
-      # it will assign the uploaded file.
-      #
-      define_method :"read_#{attachment_name}_upload" do
-        if self.send :"reprocess_#{attachment_name}?" 
-          if upload = self.send(:"#{attachment_name}_upload")
-            # We assign the cropped style rather than the whole attachment. At the moment this doesn't work with filesystem storage
-            # because the url is just a path. Something with configured hosts will be required.
-            url_temp = "http://yearbook.dev" + upload.url(:cropped)
-            Rails.logger.warn "<<< opening URL to get cropped image: #{url_temp}"
-            self.send :"#{attachment_name}=", open(url_temp)
-          end
-        end
-      end
-
-      # *reprocess_[name]?* returns true if there have been any changes to the upload association that would require a new crop.
-      #
-      define_method :"reprocess_#{attachment_name}?" do
-        #todo: we're missing the part where we check for a new upload. need to mimic the _changed? functionality somehow.
-        self.send(:"#{attachment_name}_upload_id_changed?") || self.send(:"#{attachment_name}_upload").crop_changed?
-      end
-
-
+      # Note: updates to the attached file are pushed to the holder from the upload after processing is complete, so we won't always
+      # have them immediately. Best course is to display the upload cropped rather than the holder original.
 
     end
   end

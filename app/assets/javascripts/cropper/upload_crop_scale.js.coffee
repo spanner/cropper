@@ -3,9 +3,9 @@ jQuery ($) ->
   $.fn.detach_upload = ->
     @click (e) ->
       e.preventDefault() if e
-      # removes the current image
+      # remove the current image...
       console.log "detach_upload", $(@).parents('div.uploadbox').find('input[data-clear-on-detach]')
-      # removes the nested image upload id field put in automatically by fields_for
+      # remove the nested image upload id field put in automatically by fields_for
       $(@).parents('div.uploadbox').siblings('input[type="hidden"]').remove()
       $(@).parents('.existing').remove()
 

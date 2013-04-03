@@ -21,8 +21,7 @@ module Cropper
 
     def create
       @upload.update_attributes(params[:upload])
-      # if the holder is new, this isn't populated
-      @upload.holder ||= @holder
+      # @upload.holder ||= @holder
       respond_with(@upload) do |format|
         format.js { render :partial => 'crop' }
       end
@@ -60,6 +59,7 @@ module Cropper
     def build_upload
       @column = params[:holder_column] || :image
       @upload = @holder.send(:"build_#{@column}_upload")
+      @upload.holder = @holder
       @holder.send(:"#{@column}_upload=", @upload)
     end
   

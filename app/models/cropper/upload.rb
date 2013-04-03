@@ -190,7 +190,7 @@ module Cropper
     end
     
     def update_holder
-      if holder
+      if holder && holder.persisted?
         if source = file.url(:cropped, false)
           source = (Rails.root + "public/#{source}") unless source =~ /^http/
           Rails.logger.warn "--- update_holder: #{source}"

@@ -27,22 +27,20 @@ module Cropper
     }
 
     def paperclip_styles
-      if !@styles || crop_changed?
-        @styles = {}
-        @styles[:precrop] = {
-          :geometry => precrop_geometry,
-          :processors => [:thumbnail]
+      styles = {}
+      styles[:precrop] = {
+        :geometry => precrop_geometry,
+        :processors => [:thumbnail]
+      }
+      if scale_width? && offset_left? && offset_top?
+        styles[:cropped] = {
+          :geometry => crop_geometry,
+          :processors => [:offset_thumbnail],
+          :scale => "#{scale_width}x",
+          :crop_and_offset => "%dx%d%+d%+d" % [crop_width, crop_height, -offset_left, -offset_top]
         }
-        if scale_width? && offset_left? && offset_top?
-          @styles[:cropped] = {
-            :geometry => crop_geometry,
-            :processors => [:offset_thumbnail],
-            :scale => "#{scale_width}x",
-            :crop_and_offset => "%dx%d%+d%+d" % [crop_width, crop_height, -offset_left, -offset_top]
-          }
-        end
       end
-      @styles
+      styles
     end
 
     # crop_changed? returns true if any property has changed that should cause a recrop. That includes the file attachment itself.

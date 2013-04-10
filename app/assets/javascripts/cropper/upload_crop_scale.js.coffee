@@ -308,8 +308,9 @@ jQuery ($) ->
 
       @marker.bind("mousedown", @drag)
       @input.before(@slider).hide()
-      @scale_width = @scale.width()
+      @scale_width = @scale.width() || 480
       console.log "scale_width", @scale_width
+      console.log "scale visibility:", @scale.is(":visible")
       @reposition()
 
     drag: (e) =>

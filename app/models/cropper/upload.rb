@@ -61,7 +61,7 @@ module Cropper
     # so we examine the uploaded file before it is flushed.
     #
     after_post_process :read_dimensions
-    after_post_process :update_holder
+    # after_post_process :update_holder
 
     # ## Crop boundaries
     #
@@ -187,17 +187,17 @@ module Cropper
       true
     end
     
-    def update_holder
-      if holder && holder.persisted?
-        if source = file.url(:cropped, false)
-          source = (Rails.root + "public/#{source}") unless source =~ /^http/
-          Rails.logger.warn "--- update_holder: #{source}"
-          Rails.logger.warn "--- File exist? #{File.exist?(source).inspect}"
-          holder.send :"#{holder_column}=", open(source)
-          holder.save
-        end
-      end
-    end
+    # def update_holder
+    #   if holder && holder.persisted?
+    #     if source = file.url(:cropped, false)
+    #       source = (Rails.root + "public/#{source}") unless source =~ /^http/
+    #       Rails.logger.warn "--- update_holder: #{source}"
+    #       Rails.logger.warn "--- File exist? #{File.exist?(source).inspect}"
+    #       holder.send :"#{holder_column}=", open(source)
+    #       holder.save
+    #     end
+    #   end
+    # end
 
   end
 end

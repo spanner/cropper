@@ -21,7 +21,6 @@ module Cropper
 
     def create
       @upload.update_attributes(params[:upload])
-      @upload.holder ||= @holder
       respond_with(@upload) do |format|
         format.js { render :partial => 'crop' }
       end
@@ -59,7 +58,7 @@ module Cropper
     def build_upload
       @column = params[:holder_column] || :image
       @upload = @holder.send(:"build_#{@column}_upload")
-      @holder.send(:"#{@column}_upload=", @upload)
+      @upload.holder = @holder
     end
   
     def find_upload

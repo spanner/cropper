@@ -5,11 +5,15 @@
 - target_h = upload.crop_height
 - max_w = upload.precrop_width
 - max_h = upload.precrop_height
+- initial_w = upload.scale_width unless upload.scale_width == 0
+- initial_h = upload.scale_height unless upload.scale_height == 0
+- initial_l = upload.offset_left unless upload.offset_left == 0
+- initial_t = upload.offset_top unless upload.offset_top == 0
 
-- scale_w = upload.scale_width || max_w * 3 / 4
-- scale_h = upload.scale_height || max_h * 3 / 4
-- offset_l = upload.offset_left || (target_w - scale_w)/2
-- offset_t = upload.offset_top || (target_h - scale_h)/2
+- scale_w = initial_w || max_w * 3 / 4
+- scale_h = initial_h || max_h * 3 / 4
+- offset_l = initial_l || (target_w - scale_w)/2
+- offset_t = initial_t || (target_h - scale_h)/2
 
 .cropper
   .preview{:style => "width: #{scale_w}px; height: #{scale_h}px; top: #{offset_t}px; left: #{offset_l}px"}

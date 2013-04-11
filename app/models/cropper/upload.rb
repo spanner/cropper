@@ -32,14 +32,12 @@ module Cropper
         :geometry => precrop_geometry,
         :processors => [:thumbnail]
       }
-      if scale_width? && offset_left? && offset_top?
-        styles[:cropped] = {
-          :geometry => crop_geometry,
-          :processors => [:offset_thumbnail],
-          :scale => "#{scale_width}x",
-          :crop_and_offset => "%dx%d%+d%+d" % [crop_width, crop_height, -offset_left, -offset_top]
-        }
-      end
+      styles[:cropped] = {
+        :geometry => crop_geometry,
+        :processors => [:offset_thumbnail],
+        :scale => "#{scale_width}x",
+        :crop_and_offset => "%dx%d%+d%+d" % [crop_width, crop_height, -offset_left, -offset_top]
+      }
       styles
     end
 
@@ -52,7 +50,7 @@ module Cropper
     end
     
     def mark_for_reprocessing_if_crop_changed
-      self.file = file if crop_changed?
+      self.file.assign(file)# if crop_changed?
     end
 
     ## Image dimensions

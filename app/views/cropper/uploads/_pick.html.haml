@@ -4,39 +4,39 @@
 
 - multiplier ||= params[:multiplier] || 1
 
-= fields_for upload, :upload do |iuf|
-  .uploadbox{:data => {:action => "upload", :url => cropper.uploads_path(:holder_id => holder.id, :holder_type => holder.class.to_s.underscore, :holder_column => upload.holder_column, :multiplier => multiplier, :format => :js)}}
-
-    .img
-      - if upload.persisted?
-        - width = upload.crop_width / multiplier
-        - height = upload.crop_height / multiplier
-        = link_to image_tag(upload.file.url(:cropped), :style => "width: #{width}px; height: #{height}px"), cropper.edit_upload_url(upload, :multiplier => multiplier), :data => {:action => "recrop"}
-      - else
-        .prompt
-          = link_to t(:click_to_upload), '#', :data => {:action => "pick"}
-          .droppable
-            .note
-              = t :drop_to_upload
-
-    %p.file
-      = iuf.file_field :file, :class => 'file_upload', :accept => "image"
-
-    %p.instructions
-      - unless upload.persisted?
+= fields_for holder do |hf|
+  = hf.fields_for :"#{upload.holder_column}_upload", upload do |uf|
+    .uploadbox{:data => {:action => "upload", :url => cropper.uploads_path(:holder_id => holder.id, :holder_type => holder.class.to_s.underscore, :holder_column => upload.holder_column, :multiplier => multiplier, :format => :js)}}
+      .prompt
         = link_to t(:click_to_upload), '#', :data => {:action => "pick"}
-        %span.droppable
-          = t :drop_to_upload
+        .droppable
+          .note
+            = t :drop_to_upload
+      .img<
+        - if upload.persisted?
+          - width = upload.crop_width / multiplier
+          - height = upload.crop_height / multiplier
+          = link_to image_tag(upload.file.url(:cropped), :style => "width: #{width}px; height: #{height}px"), cropper.edit_upload_url(upload, :multiplier => multiplier), :data => {:action => "recrop"}
+          = link_to t(:detach_upload), '#', :class => 'detach', :data => {:action => 'detach'}
 
-    - if extra_controls
-      .controls
-        #uploader.upload.button
-          = link_to t(:upload), '#', :data => {:action => "pick"}
-        .edit.button
-          - if upload && upload.persisted?
-            = link_to t(:edit_crop), cropper.edit_upload_url(upload, :multiplier => multiplier), :data => {:action => "recrop"}
-          - else
-            = link_to t(:edit_crop), '#', :data => {:action => "recrop"}, :class => 'unavailable'
-        .cancel.button
-          = link_to t(:cancel), '#'
+      %p.file
+        = uf.file_field :file, :class => 'file_upload', :accept => "image"
+
+      %p.instructions
+        - unless upload.persisted?
+          = link_to t(:click_to_upload), '#', :data => {:action => "pick"}
+          %span.droppable
+            = t :drop_to_upload
+
+      - if extra_controls
+        .controls
+          #uploader.upload.button
+            = link_to t(:upload), '#', :data => {:action => "pick"}
+          .edit.button
+            - if upload && upload.persisted?
+              = link_to t(:edit_crop), cropper.edit_upload_url(upload, :multiplier => multiplier), :data => {:action => "recrop"}
+            - else
+              = link_to t(:edit_crop), '#', :data => {:action => "recrop"}, :class => 'unavailable'
+          .cancel.button
+            = link_to t(:cancel), '#'
     

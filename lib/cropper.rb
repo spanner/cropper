@@ -98,8 +98,9 @@ module Cropper
       has_many :uploads, :class_name => "Cropper::Upload", :as => :holder # so what happens when we call this twice?
       
       # Ok, I give in. We have to require an image_upload_id column. It's silly trying to fake the whole association machine.
-      belongs_to :"#{attachment_name}_upload", :class_name => "Cropper::Upload"
-      accepts_nested_attributes_for :"#{attachment_name}_upload"
+      belongs_to :"#{attachment_name}_upload", :class_name => "Cropper::Upload", :autosave => true
+
+      # accepts_nested_attributes_for :"#{attachment_name}_upload"
       attr_accessible :"#{attachment_name}_upload_attributes"
       after_save :"connect_to_#{attachment_name}_upload"
       
@@ -129,6 +130,17 @@ module Cropper
         end
         Rails.logger.warn "connect_to_#{attachment_name}_upload: upload is #{upload.inspect}. Self is #{self.inspect}"
         true
+      end
+      
+      define_method :"#{attachment_name}_upload_attributes=" do |attributes|
+        # assign_nested_attributes_for_image_upload_association(:image_upload, attributes, mass_assignment_options)
+        if upload_id = attributes.delete('id')
+          self.send :"#{attachment_name}_upload=", Cropper::Upload.find(upload_id)
+        end
+        if upload = self.send(:"#{attachment_name}_upload")
+          Rails.logger.warn "setting upload attributes for #{upload.inspect} -> #{attributes.inspect}"
+          upload.assign_attributes(attributes)
+        end
       end
 
       ### Attachment

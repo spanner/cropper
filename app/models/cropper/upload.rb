@@ -20,7 +20,7 @@ module Cropper
     validates :file, :attachment_presence => true
     validates :holder_column, :presence => true
     
-    before_update :mark_for_reprocessing_if_crop_changed
+    before_update :reprocess_if_crop_changed
     before_save :apply_multiplier
     
     scope :destined_for, lambda { |col|
@@ -44,16 +44,21 @@ module Cropper
       styles
     end
 
-    # crop_changed? returns true if any property has changed that should cause a recrop. That includes the file attachment itself.
+    def styled_file(style=:cropped)
+      settings = Rails.application.config.paperclip_defaults
+      if bucket = Fog::Storage.new(settings[:fog_credentials]).directories.get(settings[:fog_directory])
+        bucket.files.get(file.path(style))
+      end
+    end
+
+    # crop_changed? returns true if any property has changed that should cause a recrop. That shuold include the file attachment itself.
     #
     def crop_changed?
-      changed = !self.reprocessed && !![:scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder_column].detect { |col| self.send :"#{col}_changed?" }
-      Rails.logger.warn "--- crop_changed? #{changed.inspect}"
-      changed
+      !self.reprocessed && !![:scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder_column].detect { |col| self.send :"#{col}_changed?" }
     end
     
-    def mark_for_reprocessing_if_crop_changed
-      self.file = file if crop_changed?
+    def reprocess_if_crop_changed
+      self.file.assign(file) if crop_changed?
     end
 
     ## Image dimensions

@@ -20,8 +20,8 @@ module Cropper
     end
 
     def create
-      @upload.update_attributes(params[:upload])
       @upload.holder ||= @holder
+      @upload.update_attributes(params[:upload])
       respond_with(@upload) do |format|
         format.js { render :partial => 'crop' }
       end

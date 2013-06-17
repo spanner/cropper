@@ -29,8 +29,8 @@ module Cropper
       uploadable_classes[k].push(column.to_sym)
       upload_options[k] ||= {}
       upload_options[k][column.to_sym] = {
-        :precrop_geometry => options.delete(:precrop),
-        :crop_geometry => options.delete(:crop)
+        :precrop_geometry => options[:styles][:precrop],
+        :crop_geometry => options[:geometry]
       }
     end
     
@@ -87,7 +87,8 @@ module Cropper
       # end
       
       # allow uploads to be assigned to this class and column in the UploadsController.
-      options.reverse_merge!(:crop => "960x640#", :precrop => "1600x1600<", :whiny => true)
+      options.reverse_merge!(:geometry => "960x640#", :whiny => true, :styles => {})
+      options[:styles].reverse_merge!({:precrop => "1600x1600<"})
       Cropper.declare_uploadable(self, attachment_name, options)
 
       ### Upload association
@@ -118,8 +119,8 @@ module Cropper
       alias_method_chain :"build_#{attachment_name}_upload", :holder_column
 
       # when a new holder is created, the interface means that the upload will have preceded it. In that
-      # case we force the setting of holder_type to allow crop-dimension lookups. Here we make sure that 
-      # holder_id is also present.
+      # case we will have forced the setting of holder_type to allow crop-dimension lookups. When eventually
+      #  saving, we have to make sure that holder_id is also present.
       define_method :"connect_to_#{attachment_name}_upload" do
         if upload = send(:"#{attachment_name}_upload")
           upload.update_column(:holder_type, self.class.to_s)

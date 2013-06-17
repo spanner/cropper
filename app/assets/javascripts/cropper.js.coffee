@@ -5,5 +5,5 @@
 
 jQuery ($) ->
   $.activate_with () ->
-    @find_including_self('.uploadbox').uploader()
-    @find_including_self('a[data-action="recrop"]').recropper()
+    @find_including_self('[data-action="upload"]').uploader()
+    @find_including_self('[data-action="recrop"]').recropper()

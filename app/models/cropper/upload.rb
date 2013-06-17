@@ -7,8 +7,8 @@ require 'open-uri'
 module Cropper
   class Upload < ActiveRecord::Base
     belongs_to :holder, :polymorphic => true
-    attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder, :holder_column
-    attr_accessor :reprocessed
+    attr_accessible :file, :scale_width, :scale_height, :offset_top, :offset_left, :holder_type, :holder_id, :holder, :holder_column, :multiplier
+    attr_accessor :reprocessed, :multiplier
     # Unlike previous versions, the main resizing and cropping step is now carried out within the upload object.
     # Usually this happens in a second step: first we upload, then we update with crop parameters, but it is
     # also possible to present the cropping in javascript and upload the file with all the necessary values.
@@ -21,6 +21,7 @@ module Cropper
     validates :holder_column, :presence => true
     
     before_update :mark_for_reprocessing_if_crop_changed
+    before_save :apply_multiplier
     
     scope :destined_for, lambda { |col|
       where(:holder_column => col).order('updated_at DESC, created_at DESC')
@@ -32,7 +33,7 @@ module Cropper
         :geometry => precrop_geometry,
         :processors => [:thumbnail]
       }
-      if scale_width? && offset_left? && offset_top?
+      if croppable?
         styles[:cropped] = {
           :geometry => crop_geometry,
           :processors => [:offset_thumbnail],
@@ -61,7 +62,7 @@ module Cropper
     # so we examine the uploaded file before it is flushed.
     #
     after_post_process :read_dimensions
-    after_post_process :update_holder
+    after_save :update_holder
 
     # ## Crop boundaries
     #
@@ -168,6 +169,21 @@ module Cropper
 
   private
 
+    # sometimes the interface will work in miniature and send through a multiplier by which to scale everything up.
+    def apply_multiplier
+      if multiplier = self.multiplier.to_i
+        Rails.logger.warn "multiplying upload params by #{multiplier}."
+        if multiplier != 1
+          %w{offset_left offset_top scale_width scale_height}.each do |col|
+            if param = self.send(col.to_sym)
+              self.send(:"#{col}=", param * self.multiplier.to_i)
+            end
+          end
+        end
+        self.multiplier = 1
+      end
+    end
+
     # *read_dimensions* is called after post processing to record in the database the original width, height 
     # and extension of the uploaded file. At this point the file queue will not have been flushed but the upload
     # should be in place. We grab dimensions from the temp file and calculate thumbnail dimensions later, on demand.
@@ -187,15 +203,22 @@ module Cropper
       true
     end
     
+    def croppable?
+      !!scale_width && !!offset_left && !!offset_top
+    end
+    
     def update_holder
-      if holder && holder.persisted?
-        if source = file.url(:cropped, false)
-          source = (Rails.root + "public/#{source}") unless source =~ /^http/
-          Rails.logger.warn "--- update_holder: #{source}"
-          Rails.logger.warn "--- File exist? #{File.exist?(source).inspect}"
-          holder.send :"#{holder_column}=", open(source)
-          holder.save
+      if holder
+        holder.send :"#{holder_column}_upload=", self
+        if croppable? && holder.persisted?
+          if source = file.url(:cropped, false)
+            source = (Rails.root + "public/#{source}") unless source =~ /^http/
+            Rails.logger.warn "--- update_holder: #{source}"
+            Rails.logger.warn "--- File exist? #{File.exist?(source).inspect}"
+            holder.send :"#{holder_column}=", open(source)
+          end
         end
+        holder.save
       end
     end
 

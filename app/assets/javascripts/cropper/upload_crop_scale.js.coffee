@@ -15,7 +15,7 @@ jQuery ($) ->
       dropbox = $(@)
       csrf_token = dropbox.parents("form").find('input[name="authenticity_token"]').val()
       filefield = dropbox.find('input[type="file"]')
-      url = options.url ? dropbox.attr("data-url") ? dropbox.attr("rel")
+      url = options.url ? dropbox.attr("data-url")
       paramname = options.paramname ? "upload[file]"
     
       finisher = (i, file, response, time) ->
@@ -98,6 +98,7 @@ jQuery ($) ->
     @
     
   $.fn.recropper = ->
+    console.log "recropper", @
     uploadbox = $("div.uploadbox")
     @click (e) ->
       e.preventDefault()
@@ -131,6 +132,7 @@ jQuery ($) ->
       @preview = @element.find("div.preview")
       @instructions = @element.find("p.drag_instructions")
       @overflow = $("<div class=\"overflow\">").append(@preview.find("img").clone())
+      console.log "overflow", @overflow
       @controls = @container.find(".controls")
       @container.find("div.preview").remove()
       @container.find("div.img").after(@preview)
@@ -161,8 +163,8 @@ jQuery ($) ->
       @recalculateLimits()
       @setOverflow()
       @setControls()
-      @container.bind "mouseenter", @showClutter
-      @container.bind "mouseleave", @hideClutter
+      @container.bind "mouseover", @showClutter
+      @container.bind "mouseout", @hideClutter
       # @hide()
 
     drag: (e) =>
@@ -221,7 +223,7 @@ jQuery ($) ->
       @showClutter()
       @hideOverflow()
 
-    setOverflow: (argument) =>
+    setOverflow: () =>
       @overflow.css
         width: @preview.width()
         height: @preview.height()

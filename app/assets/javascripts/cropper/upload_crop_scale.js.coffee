@@ -6,6 +6,29 @@ jQuery ($) ->
       $(@).parents('div.uploadbox').find('input[data-clear-on-detach]').val(1)
       $(@).parents('.img').empty()
 
+  $.fn.recropper = ->
+    uploadbox = $("div.uploadbox")
+    @click (e) ->
+      e.preventDefault()
+      uploadbox.find("div.waiter").show()
+      $.get $(this).attr("href"), ((response) ->
+        new Cropper(response, uploadbox)
+      ), "html"
+    @
+
+  $.fn.picker = (filefield) ->
+    @click (e) ->
+      e.preventDefault()
+      e.stopPropagation()
+      filefield ?= $(".uploadbox").find('input[type="file"]')
+      filefield.trigger('click')
+    @
+
+  $.fn.click_proxy = (target_selector) ->
+    this.bind "click", (e) ->
+      e.preventDefault()
+      $(target_selector).click()
+
   $.fn.uploader = (opts) ->
     @each ->
       options = $.extend {}, opts
@@ -94,29 +117,6 @@ jQuery ($) ->
         dropbox.trigger "pick", filefield[0]
     @
     
-  $.fn.recropper = ->
-    console.log "recropper", @
-    uploadbox = $("div.uploadbox")
-    @click (e) ->
-      e.preventDefault()
-      uploadbox.find("div.waiter").show()
-      $.get $(this).attr("href"), ((response) ->
-        new Cropper(response, uploadbox)
-      ), "html"
-    @
-
-  $.fn.picker = (filefield) ->
-    @click (e) ->
-      e.preventDefault()
-      e.stopPropagation()
-      filefield ?= $(".uploadbox").find('input[type="file"]')
-      filefield.trigger('click')
-    @
-
-  $.fn.click_proxy = (target_selector) ->
-    this.bind "click", (e) ->
-      e.preventDefault()
-      $(target_selector).click()
 
 
 
@@ -129,7 +129,6 @@ jQuery ($) ->
       @preview = @element.find("div.preview")
       @instructions = @element.find("p.drag_instructions")
       @overflow = $("<div class=\"overflow\">").append(@preview.find("img").clone())
-      console.log "overflow", @overflow
       @controls = @container.find(".controls")
       @container.find("div.preview").remove()
       @container.find("div.img").after(@preview)
@@ -308,12 +307,9 @@ jQuery ($) ->
       @marker.bind("mousedown", @drag)
       @input.before(@slider).hide()
       @scale_width = @scale.width() || 480
-      console.log "scale_width", @scale_width
-      console.log "scale visibility:", @scale.is(":visible")
       @reposition()
 
     drag: (e) =>
-      console.log "scaler drag"
       e.preventDefault()
       @lastX = e.pageX
       $(document).bind "mousemove", @move

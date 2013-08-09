@@ -101,7 +101,7 @@ module Cropper
       belongs_to :"#{attachment_name}_upload", :class_name => "Cropper::Upload", :autosave => true
 
       # accepts_nested_attributes_for :"#{attachment_name}_upload"
-      attr_accessible :"#{attachment_name}_upload_attributes"
+      # attr_accessible :"#{attachment_name}_upload_attributes" # USE STRONG ATTRIBUTES
       after_save :"connect_to_#{attachment_name}_upload"
       
       #...but we still need to intervene to set the holder_column column of the upload when it is assigned
